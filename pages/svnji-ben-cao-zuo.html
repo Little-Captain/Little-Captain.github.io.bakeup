@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+	<meta charset="utf-8">
+	<title>SVN基本操作 — Little Captain's Blog </title>
+	<meta name="description" content="">
+	<meta name="author" content="Little Captain">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+	<!--[if lt IE 9]>
+		<script src="http://littlecaptain.net/theme/html5.js"></script>
+		<![endif]-->
+	<link href="http://littlecaptain.net/theme/css/ipython.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/bootswatch/3.2.0/simplex/bootstrap.min.css" rel="stylesheet">
+	<link href="http://littlecaptain.net/theme/css/local.css" rel="stylesheet">
+	<link href="http://littlecaptain.net/theme/css/pygments.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+	<div class="page-header">
+		<h1><a href="http://littlecaptain.net/">Little Captain's Blog</a>
+			<br>	</div>
+	<div class="row">
+		<div class="col-md-8 col-md-offset-2">
+        
+<section id="content" class="body">    
+    <ul>
+<li>SVN</li>
+<li>源代码管理</li>
+</ul>
+<hr>
+<p><em>基本操作原理图</em></p>
+<p><img alt="" src="/assets/images/SVN/基本操作.png"></p>
+<!--more-->
+
+<p><em>SVN版本管理架构模式</em></p>
+<p><img alt="" src="/assets/images/SVN/SVN架构示意图.png"></p>
+<h1>SVN客户端常用命令</h1>
+<div class="highlight"><pre><span></span><span class="c1"># 下载服务器的代码到本地 （简写svn co）</span>
+svn checkout
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1"># 将改动的文件提交到服务器（简写svn ci）</span>
+svn commit
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1"># 更新服务器的代码到本地 （简写svn up）</span>
+svn update
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1"># 向本地的版本控制库中添加新文件</span>
+svn add
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1"># 从本地的版本控制库中删除文件（简写svn del、svn rm）</span>
+svn delete
+svn remove
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1"># 移动文件或者目录或文件更名</span>
+svn move
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1"># 创建纳入版本控制下的新目录</span>
+svn mkdir
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1"># 撤销之前的一切修改</span>
+svn revert
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1"># 将两个版本之间的差异合并到当前文件</span>
+svn merge
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1"># 查看文件的详细信息</span>
+svn info
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1"># 查看不同版本的区别</span>
+svn diff
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1"># 查看日志信息</span>
+svn log
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1"># 列出版本库下的文件和目录列表</span>
+svn list
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1"># 查看文件状态（简写svn st）</span>
+svn status
+<span class="c1"># 状态说明</span>
+<span class="s1">&#39; &#39;</span> 没有修改
+<span class="s1">&#39;A&#39;</span> 被添加到本地代码仓库
+<span class="s1">&#39;C&#39;</span> 冲突
+<span class="s1">&#39;D&#39;</span> 被删除
+<span class="s1">&#39;I&#39;</span> 被忽略
+<span class="s1">&#39;M&#39;</span> 被修改
+<span class="s1">&#39;R&#39;</span> 被替换
+<span class="s1">&#39;X&#39;</span> 外部定义创建的版本目录
+<span class="s1">&#39;?&#39;</span> 文件没有被添加到本地版本库内
+<span class="s1">&#39;!&#39;</span> 文件丢失或者不完整（不是通过svn命令删除的文件）
+<span class="s1">&#39;~&#39;</span> 受控文件被其他文件阻隔
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1"># 获取帮助信息（比如svn help ci）</span>
+svn <span class="nb">help</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1"># 加锁</span>
+svn lock
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1"># 解锁</span>
+svn unlock
+</pre></div>
+
+
+<h1>常见操作详细解析</h1>
+<h2>检出</h2>
+<div class="highlight"><pre><span></span><span class="c1"># 将项目检出（下载） 至本地</span>
+<span class="c1"># 如果省略路径，就下载到命令行当前所在的路径</span>
+svn checkout URL  <span class="o">[</span>PATH<span class="o">]</span>
+svn co URL  <span class="o">[</span>PATH<span class="o">]</span>
+<span class="c1"># 常用方式</span>
+svn checkout URL --username<span class="o">=</span>xxx --password<span class="o">=</span>xxx
+</pre></div>
+
+
+<h2>提交</h2>
+<div class="highlight"><pre><span></span><span class="c1"># 将改动过的文件提交至服务器</span>
+<span class="c1"># 如果省略路径，将命令行所在路径中所有改动过的文件提交到服务器</span>
+svn commit  -m <span class="s2">&quot;注释&quot;</span>  <span class="o">[</span>PATH<span class="o">]</span>
+svn ci  -m <span class="s2">&quot;注释&quot;</span>  <span class="o">[</span>PATH<span class="o">]</span>
+</pre></div>
+
+
+<h2>添加</h2>
+<div class="highlight"><pre><span></span><span class="c1"># 提交一个新建的文件到服务器，需要2个步骤</span>
+<span class="c1"># 添加新建的文件到本地的版本控制库中：</span>
+svn add PATH
+
+<span class="c1"># 提交刚才的添加操作到服务器：</span>
+svn commit
+
+<span class="c1"># 如果直接提交一个没有添加到本地版本控制库中的文件，会报下面的错误</span>
+is not a working copy
+</pre></div>
+
+
+<h2>删除</h2>
+<div class="highlight"><pre><span></span><span class="c1"># 删除服务器上的某个文件，需要做2个步骤</span>
+<span class="c1"># 将文件从本地的版本控制库中移除：</span>
+svn delete PATH
+<span class="c1"># 或</span>
+svn remove PATH
+
+<span class="c1"># 提交刚才的删除操作到服务器：</span>
+svn commit
+</pre></div>
+
+
+<h2>更新</h2>
+<div class="highlight"><pre><span></span><span class="c1"># 将服务器的最新代码更新到本地</span>
+<span class="c1"># 如果省略路径，就更新命令行所在路径的所有内容</span>
+svn update <span class="o">[</span>PATH<span class="o">]</span>
+<span class="c1"># 将文件恢复至某个版本</span>
+svn update -r 版本号 <span class="o">[</span>PATH<span class="o">]</span>
+</pre></div>
+
+
+<h1>使用SVN总结</h1>
+<ul>
+<li>只要有改动就 <code>commit</code></li>
+<li>只要有提交就 <code>update</code></li>
+</ul>
+<h2>关于版本回退</h2>
+<div class="highlight"><pre><span></span><span class="c1"># 不小心写错了很多东西，想撤销所写的东西（还未把修改提交到服务器）</span>
+svn revert
+
+<span class="c1"># 不小心删错了文件，想把文件恢复回来（还未把删除提交到服务器）</span>
+svn revert
+
+<span class="c1"># 不小心写错了很多东西，想撤销所写的东西（已经把修改提交到服务器）</span>
+svn update -r 版本号
+
+<span class="c1"># 不小心删错了文件，想把文件恢复回来（已经把删除提交到服务器）</span>
+svn update -r 版本号
+</pre></div>
+</section>
+		</div>
+	</div> 	<!-- <hr> -->
+</div> <!-- /container -->
+<footer class="aw-footer bg-danger">
+	<div class="container"> <!-- footer -->
+		<div class="row">
+			<div class="col-md-10 col-md-offset-1">
+				<div class="row">
+					<div class="col-md-3">
+						<h4>Navigation</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="http://littlecaptain.net">Little Captain's Blog</a></li>
+							<li><a href="http://littlecaptain.net/pages/appde-tong-zhi-zhi-chi.html"><i class="fa fa-App的通知支持 "></i> App的通知支持</a></li>
+							<li><a href="http://littlecaptain.net/pages/block-zong-jie.html"><i class="fa fa-Block 总结 "></i> Block 总结</a></li>
+							<li><a href="http://littlecaptain.net/pages/building-c-applications.html"><i class="fa fa-Building C++ Applications "></i> Building C++ Applications</a></li>
+							<li><a href="http://littlecaptain.net/pages/gitshi-yong-jing-yan-ji-jin.html"><i class="fa fa-Git使用经验集锦 "></i> Git使用经验集锦</a></li>
+							<li><a href="http://littlecaptain.net/pages/gitji-ben-cao-zuo.html"><i class="fa fa-Git基本操作 "></i> Git基本操作</a></li>
+							<li><a href="http://littlecaptain.net/pages/javade-shu-ju-lei-xing.html"><i class="fa fa-Java的数据类型 "></i> Java的数据类型</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-1.html"><i class="fa fa-Lean Python(Chapter 1) "></i> Lean Python(Chapter 1)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-10.html"><i class="fa fa-Lean Python(Chapter 10) "></i> Lean Python(Chapter 10)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-11.html"><i class="fa fa-Lean Python(Chapter 11) "></i> Lean Python(Chapter 11)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-2.html"><i class="fa fa-Lean Python(Chapter 2) "></i> Lean Python(Chapter 2)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-3.html"><i class="fa fa-Lean Python(Chapter 3) "></i> Lean Python(Chapter 3)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-4.html"><i class="fa fa-Lean Python(Chapter 4) "></i> Lean Python(Chapter 4)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-5.html"><i class="fa fa-Lean Python(Chapter 5) "></i> Lean Python(Chapter 5)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-6.html"><i class="fa fa-Lean Python(Chapter 6) "></i> Lean Python(Chapter 6)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-7.html"><i class="fa fa-Lean Python(Chapter 7) "></i> Lean Python(Chapter 7)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-8.html"><i class="fa fa-Lean Python(Chapter 8) "></i> Lean Python(Chapter 8)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-9.html"><i class="fa fa-Lean Python(Chapter 9) "></i> Lean Python(Chapter 9)</a></li>
+							<li><a href="http://littlecaptain.net/pages/linuxren-wu-guan-li.html"><i class="fa fa-Linux任务管理 "></i> Linux任务管理</a></li>
+							<li><a href="http://littlecaptain.net/pages/nodejsgai-shu.html"><i class="fa fa-Node.js概述 "></i> Node.js概述</a></li>
+							<li><a href="http://littlecaptain.net/pages/objective-cdai-ma-gui-fan.html"><i class="fa fa-Objective-C代码规范 "></i> Objective-C代码规范</a></li>
+							<li><a href="http://littlecaptain.net/pages/phpkai-fa-appjie-kou.html"><i class="fa fa-PHP开发App接口 "></i> PHP开发App接口</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyinstallershi-yong-shou-ce.html"><i class="fa fa-PyInstaller使用手册 "></i> PyInstaller使用手册</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-color-dialog.html"><i class="fa fa-PyQT5 color dialog "></i> PyQT5 color dialog</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-input-dialog.html"><i class="fa fa-PyQT5 input dialog "></i> PyQT5 input dialog</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqtchapter-1.html"><i class="fa fa-PyQt(Chapter 1) "></i> PyQt(Chapter 1)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqtchapter-2.html"><i class="fa fa-PyQt(Chapter 2) "></i> PyQt(Chapter 2)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqtchapter-3.html"><i class="fa fa-PyQt(Chapter 3) "></i> PyQt(Chapter 3)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqtchapter-4.html"><i class="fa fa-PyQt(Chapter 4) "></i> PyQt(Chapter 4)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqtchapter-5.html"><i class="fa fa-PyQt(Chapter 5) "></i> PyQt(Chapter 5)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqtchapter-6.html"><i class="fa fa-PyQt(Chapter 6) "></i> PyQt(Chapter 6)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqtchapter-7.html"><i class="fa fa-PyQt(Chapter 7) "></i> PyQt(Chapter 7)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-directory-view.html"><i class="fa fa-PyQt5 Directory View "></i> PyQt5 Directory View</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-form-layout.html"><i class="fa fa-PyQt5 Form Layout "></i> PyQt5 Form Layout</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-matplotlib.html"><i class="fa fa-PyQt5 Matplotlib "></i> PyQt5 Matplotlib</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-qboxlayout.html"><i class="fa fa-PyQt5 QBoxLayout "></i> PyQt5 QBoxLayout</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-treeview.html"><i class="fa fa-PyQt5 Treeview "></i> PyQt5 Treeview</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-absolute-position.html"><i class="fa fa-PyQt5 absolute position "></i> PyQt5 absolute position</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-browser.html"><i class="fa fa-PyQt5 browser "></i> PyQt5 browser</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-buttons.html"><i class="fa fa-PyQt5 buttons "></i> PyQt5 buttons</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-colors.html"><i class="fa fa-PyQt5 colors "></i> PyQt5 colors</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-drag-and-drop.html"><i class="fa fa-PyQt5 drag and drop "></i> PyQt5 drag and drop</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-file-dialog.html"><i class="fa fa-PyQt5 file dialog "></i> PyQt5 file dialog</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-font-dialog.html"><i class="fa fa-PyQt5 font dialog "></i> PyQt5 font dialog</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-grid-layout.html"><i class="fa fa-PyQt5 grid layout "></i> PyQt5 grid layout</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-horizontal-layout.html"><i class="fa fa-PyQt5 horizontal layout "></i> PyQt5 horizontal layout</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-image.html"><i class="fa fa-PyQt5 image "></i> PyQt5 image</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-menu.html"><i class="fa fa-PyQt5 menu "></i> PyQt5 menu</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-messagebox.html"><i class="fa fa-PyQt5 messagebox "></i> PyQt5 messagebox</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-pixels.html"><i class="fa fa-PyQt5 pixels "></i> PyQt5 pixels</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-signals-and-slots.html"><i class="fa fa-PyQt5 signals and slots "></i> PyQt5 signals and slots</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-statusbar.html"><i class="fa fa-PyQt5 statusbar "></i> PyQt5 statusbar</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-table.html"><i class="fa fa-PyQt5 table "></i> PyQt5 table</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tabs.html"><i class="fa fa-PyQt5 tabs "></i> PyQt5 tabs</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-textbox.html"><i class="fa fa-PyQt5 textbox "></i> PyQt5 textbox</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialcustom-widgets.html"><i class="fa fa-PyQt5 tutorial(Custom widgets) "></i> PyQt5 tutorial(Custom widgets)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialdate-and-time.html"><i class="fa fa-PyQt5 tutorial(Date and time) "></i> PyQt5 tutorial(Date and time)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialdialogs.html"><i class="fa fa-PyQt5 tutorial(Dialogs) "></i> PyQt5 tutorial(Dialogs)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialdrag-drop.html"><i class="fa fa-PyQt5 tutorial(Drag & drop) "></i> PyQt5 tutorial(Drag & drop)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialevents-and-signals.html"><i class="fa fa-PyQt5 tutorial(Events and signals) "></i> PyQt5 tutorial(Events and signals)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialfirst-programs.html"><i class="fa fa-PyQt5 tutorial(First programs) "></i> PyQt5 tutorial(First programs)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialintroduction.html"><i class="fa fa-PyQt5 tutorial(Introduction) "></i> PyQt5 tutorial(Introduction)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutoriallayout-management.html"><i class="fa fa-PyQt5 tutorial(Layout management) "></i> PyQt5 tutorial(Layout management)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialmenus-and-toolbars.html"><i class="fa fa-PyQt5 tutorial(Menus and toolbars) "></i> PyQt5 tutorial(Menus and toolbars)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialpainting.html"><i class="fa fa-PyQt5 tutorial(Painting) "></i> PyQt5 tutorial(Painting)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialthe-tetris-game.html"><i class="fa fa-PyQt5 tutorial(The Tetris game) "></i> PyQt5 tutorial(The Tetris game)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialwidgets-ii.html"><i class="fa fa-PyQt5 tutorial(Widgets II) "></i> PyQt5 tutorial(Widgets II)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialwidgets.html"><i class="fa fa-PyQt5 tutorial(Widgets) "></i> PyQt5 tutorial(Widgets)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-window.html"><i class="fa fa-PyQt5 window "></i> PyQt5 window</a></li>
+							<li><a href="http://littlecaptain.net/pages/runloopjiu-zhe-yi-pian.html"><i class="fa fa-RunLoop就这一篇 "></i> RunLoop就这一篇</a></li>
+							<li><a href="http://littlecaptain.net/pages/svnji-ben-cao-zuo.html"><i class="fa fa-SVN基本操作 "></i> SVN基本操作</a></li>
+							<li><a href="http://littlecaptain.net/pages/uitableview-de-xing-neng-you-hua.html"><i class="fa fa-UITableView 的性能优化 "></i> UITableView 的性能优化</a></li>
+							<li><a href="http://littlecaptain.net/pages/xcodechang-jian-she-zhi-ji-jin.html"><i class="fa fa-Xcode常见设置集锦 "></i> Xcode常见设置集锦</a></li>
+							<li><a href="http://littlecaptain.net/pages/condade-ji-ben-shi-yong.html"><i class="fa fa-conda的基本使用 "></i> conda的基本使用</a></li>
+							<li><a href="http://littlecaptain.net/pages/gitchang-yong-ming-ling.html"><i class="fa fa-git常用命令 "></i> git常用命令</a></li>
+							<li><a href="http://littlecaptain.net/pages/hello-blog.html"><i class="fa fa-Hello Blog "></i> Hello Blog</a></li>
+							<li><a href="http://littlecaptain.net/pages/ioskai-fa-zhong-de-ge-chong-chi-cun.html"><i class="fa fa-iOS开发中的各种尺寸 "></i> iOS开发中的各种尺寸</a></li>
+							<li><a href="http://littlecaptain.net/pages/iosshu-ju-de-cun-chu-fang-shi.html"><i class="fa fa-iOS数据的存储方式 "></i> iOS数据的存储方式</a></li>
+							<li><a href="http://littlecaptain.net/pages/ioswen-jian-shang-chuan.html"><i class="fa fa-iOS文件上传 "></i> iOS文件上传</a></li>
+							<li><a href="http://littlecaptain.net/pages/ioswen-jian-xia-zai.html"><i class="fa fa-iOS文件下载 "></i> iOS文件下载</a></li>
+							<li><a href="http://littlecaptain.net/pages/iosjian-ce-wang-luo-zhuang-tai.html"><i class="fa fa-iOS监测网络状态 "></i> iOS监测网络状态</a></li>
+							<li><a href="http://littlecaptain.net/pages/ioswang-luo-http.html"><i class="fa fa-iOS网络-HTTP "></i> iOS网络-HTTP</a></li>
+							<li><a href="http://littlecaptain.net/pages/ioswang-luo-nsurlconnection.html"><i class="fa fa-iOS网络-NSURLConnection "></i> iOS网络-NSURLConnection</a></li>
+							<li><a href="http://littlecaptain.net/pages/ioswang-luo-nsurlsession.html"><i class="fa fa-iOS网络-NSURLSession "></i> iOS网络-NSURLSession</a></li>
+							<li><a href="http://littlecaptain.net/pages/ioswang-luo-ji-chu.html"><i class="fa fa-iOS网络-基础 "></i> iOS网络-基础</a></li>
+							<li><a href="http://littlecaptain.net/pages/iosjie-ya-suo.html"><i class="fa fa-iOS解压缩 "></i> iOS解压缩</a></li>
+							<li><a href="http://littlecaptain.net/pages/ipa-bao-zhong-de-png-wen-jian-de-zheng-chang-hua.html"><i class="fa fa-ipa 包中的 PNG 文件的正常化 "></i> ipa 包中的 PNG 文件的正常化</a></li>
+							<li><a href="http://littlecaptain.net/pages/nullablenonnull.html"><i class="fa fa-nullable&nonnull "></i> nullable&nonnull</a></li>
+							<li><a href="http://littlecaptain.net/pages/shellkong-zhi-yu-ju.html"><i class="fa fa-shell控制语句 "></i> shell控制语句</a></li>
+							<li><a href="http://littlecaptain.net/pages/shellshu-xue-yun-suan.html"><i class="fa fa-shell数学运算 "></i> shell数学运算</a></li>
+							<li><a href="http://littlecaptain.net/pages/shelljiao-ben-bian-cheng-ji-chu.html"><i class="fa fa-shell脚本编程基础 "></i> shell脚本编程基础</a></li>
+							<li><a href="http://littlecaptain.net/pages/yi-kuan-ji-yu-afnetworkingfeng-zhuang-de-wang-luo-kuang-jia.html"><i class="fa fa-一款基于AFNetworking封装的网络框架 "></i> 一款基于AFNetworking封装的网络框架</a></li>
+							<li><a href="http://littlecaptain.net/pages/fen-bu-shi-git-gong-zuo-liu-cheng.html"><i class="fa fa-分布式Git - 工作流程 "></i> 分布式Git - 工作流程</a></li>
+							<li><a href="http://littlecaptain.net/pages/fa-bu-kuang-jia-dao-cocoapodsshang.html"><i class="fa fa-发布框架到CocoaPods上 "></i> 发布框架到CocoaPods上</a></li>
+							<li><a href="http://littlecaptain.net/pages/ming-ling-ti-shi-fu-de-ge-shi.html"><i class="fa fa-命令提示符的格式 "></i> 命令提示符的格式</a></li>
+							<li><a href="http://littlecaptain.net/pages/zai-windowsping-tai-da-jian-gogsfu-wu.html"><i class="fa fa-在Windows平台搭建gogs服务 "></i> 在Windows平台搭建gogs服务</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-gcdzong-jie.html"><i class="fa fa-多线程-GCD总结 "></i> 多线程-GCD总结</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-nsoperationzong-jie.html"><i class="fa fa-多线程-NSOperation总结 "></i> 多线程-NSOperation总结</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-nsthreadde-shi-yong.html"><i class="fa fa-多线程-NSThread的使用 "></i> 多线程-NSThread的使用</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-ioszhong-de-zhu-xian-cheng.html"><i class="fa fa-多线程-iOS中的主线程 "></i> 多线程-iOS中的主线程</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-ioszhong-de-shi-xian-fang-an.html"><i class="fa fa-多线程-iOS中的实现方案 "></i> 多线程-iOS中的实现方案</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-ji-ben-gai-nian-he-yuan-li.html"><i class="fa fa-多线程-基本概念和原理 "></i> 多线程-基本概念和原理</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-an-quan-yin-huan.html"><i class="fa fa-多线程-安全隐患 "></i> 多线程-安全隐患</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-xian-cheng-jian-tong-xin.html"><i class="fa fa-多线程-线程间通信 "></i> 多线程-线程间通信</a></li>
+							<li><a href="http://littlecaptain.net/pages/da-jian-gitfu-wu-qi.html"><i class="fa fa-搭建git服务器 "></i> 搭建git服务器</a></li>
+							<li><a href="http://littlecaptain.net/pages/ben-di-tui-song-tong-zhi.html"><i class="fa fa-本地推送通知 "></i> 本地推送通知</a></li>
+							<li><a href="http://littlecaptain.net/pages/zheng-ze-biao-da-shi-ji-chu.html"><i class="fa fa-正则表达式基础 "></i> 正则表达式基础</a></li>
+							<li><a href="http://littlecaptain.net/pages/huan-xin-ni-cheng-he-tou-xiang-de-chu-li.html"><i class="fa fa-环信昵称和头像的处理 "></i> 环信昵称和头像的处理</a></li>
+							<li><a href="http://littlecaptain.net/pages/wang-luo-ji-ben-gai-nian.html"><i class="fa fa-网络基本概念 "></i> 网络基本概念</a></li>
+							<li><a href="http://littlecaptain.net/pages/wang-luo-mo-xing.html"><i class="fa fa-网络模型 "></i> 网络模型</a></li>
+							<li><a href="http://littlecaptain.net/pages/liao-liao-ios-de-mvc-jia-gou.html"><i class="fa fa-聊聊 iOS 的 MVC 架构 "></i> 聊聊 iOS 的 MVC 架构</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Author</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="#">You can add links in your config file</a></li>
+							<li><a href="#">Another social link</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Categories</h4>
+						<ul class="list-unstyled my-list-style">
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Links</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="http://getpelican.com/">Pelican</a></li>
+							<li><a href="http://python.org/">Python.org</a></li>
+							<li><a href="http://jinja.pocoo.org/">Jinja2</a></li>
+							<li><a href="#">You can modify those links in your config file</a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</footer>
+<div class="container">
+	<div class="row">
+		<div class="col-md-12 text-center center-block aw-bottom">
+			<p>&copy; Little Captain 2016</p>
+			<p>Powered by Pelican</p>
+		</div>
+	</div>
+</div>
+<!-- JavaScript -->
+<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+	$("div.collapseheader").click(function () {
+		$header = $(this).children("span").first();
+		$codearea = $(this).children(".input_area");
+		$codearea.slideToggle(500, function () {
+			$header.text(function () {
+				return $codearea.is(":visible") ? "Collapse Code" : "Expand Code";
+			});
+		});
+	});
+});
+</script>
+</body>
+</html>

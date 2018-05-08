@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+	<meta charset="utf-8">
+	<title>RunLoop就这一篇 — Little Captain's Blog </title>
+	<meta name="description" content="">
+	<meta name="author" content="Little Captain">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+	<!--[if lt IE 9]>
+		<script src="http://littlecaptain.net/theme/html5.js"></script>
+		<![endif]-->
+	<link href="http://littlecaptain.net/theme/css/ipython.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/bootswatch/3.2.0/simplex/bootstrap.min.css" rel="stylesheet">
+	<link href="http://littlecaptain.net/theme/css/local.css" rel="stylesheet">
+	<link href="http://littlecaptain.net/theme/css/pygments.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+	<div class="page-header">
+		<h1><a href="http://littlecaptain.net/">Little Captain's Blog</a>
+			<br>	</div>
+	<div class="row">
+		<div class="col-md-8 col-md-offset-2">
+        
+<section id="content" class="body">    
+    <ul>
+<li>多线程</li>
+<li>iOS</li>
+<li>RunLoop</li>
+</ul>
+<hr>
+<h1>概念</h1>
+<ul>
+<li>字面意思 : 运行循环</li>
+</ul>
+<!--more-->
+
+<p><em>示意图</em></p>
+<p>![](/assets/images/多线程/runloop mode.png)</p>
+<h1>基本作用</h1>
+<ul>
+<li>保持程序的持续运行</li>
+<li>处理App中的各种事件</li>
+<li>触摸事件</li>
+<li>定时器事件</li>
+<li>Selector事件</li>
+<li>…</li>
+<li>节省CPU资源</li>
+<li>提高程序性能, 该做事时做事，该休息时休息</li>
+<li>...</li>
+</ul>
+<h2>如果没有 runloop</h2>
+<div class="highlight"><pre><span></span><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span> <span class="n">argv</span><span class="p">[])</span> <span class="p">{</span>
+    <span class="n">NSLog</span><span class="p">(</span><span class="s">@&quot;execute main function&quot;</span><span class="p">);</span> <span class="c1">// 程序开始</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">// 程序结束</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<h2>如果有了 runloop</h2>
+<div class="highlight"><pre><span></span><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span> <span class="n">argv</span><span class="p">[])</span> <span class="p">{</span>
+    <span class="kt">BOOL</span> <span class="n">running</span> <span class="o">=</span> <span class="nb">YES</span><span class="p">;</span> <span class="c1">// 程序开始</span>
+    <span class="k">do</span> <span class="p">{</span>
+        <span class="c1">// 执行各种任务，处理各种事件</span>
+             <span class="c1">// ......</span>
+    <span class="p">}</span> <span class="k">while</span> <span class="p">(</span><span class="n">running</span><span class="p">);</span> <span class="c1">// 持续运行</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<ul>
+<li>main 函数里面启动了 RunLoop ，程序并不会马上退出，保持持续运行状态</li>
+</ul>
+<div class="highlight"><pre><span></span><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span> <span class="n">argv</span><span class="p">[])</span> <span class="p">{</span>
+    <span class="k">@autoreleasepool</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">UIApplicationMain</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span> <span class="n">argv</span><span class="p">,</span> <span class="nb">nil</span><span class="p">,</span> <span class="n">NSStringFromClass</span><span class="p">([</span><span class="n">AppDelegate</span> <span class="k">class</span><span class="p">]));</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>解释</p>
+<ul>
+<li>第3行代码的UIApplicationMain函数内部就启动了一个 runloop</li>
+<li>UIApplicationMain函数一直不会返回，保持了程序的持续运行</li>
+<li>这个默认启动的runloop是跟主线程相关联的</li>
+</ul>
+<h1>RunLoop对象</h1>
+<h3>iOS中有2套API来访问和使用RunLoop</h3>
+<ul>
+<li>NSRunLoop</li>
+<li>Foundation</li>
+<li>NSRunLoop 是基于 CFRunLoopRef 的一层 OC 包装</li>
+<li>CFRunLoopRef</li>
+<li>Core Foundation</li>
+<li>要了解RunLoop内部结构，需要多研究CFRunLoopRef层面的API</li>
+<li>CFRunLoopRef是开源的</li>
+<li>NSRunLoop和CFRunLoopRef都代表着RunLoop对象, 可以相互转换</li>
+</ul>
+<h3>获得RunLoop对象</h3>
+<ul>
+<li>Foundation</li>
+<li>currentRunLoop, 获得当前线程的RunLoop对象</li>
+<li>mainRunLoop, 获得主线程的RunLoop对象</li>
+<li>Core Foundation</li>
+<li>CFRunLoopGetCurrent, 获得当前线程的RunLoop对象</li>
+<li>CFRunLoopGetMain, 获得主线程的RunLoop对象</li>
+</ul>
+<h1>RunLoop与线程</h1>
+<ul>
+<li>每条线程都有唯一的一个与之对应的RunLoop对象</li>
+<li>主线程的RunLoop已经自动创建好了</li>
+<li>子线程的RunLoop需要主动创建</li>
+<li>RunLoop在第一次获取时创建，在线程结束时销毁</li>
+</ul>
+<h1>RunLoop相关类</h1>
+<h2>CFRunLoopModeRef</h2>
+<ul>
+<li>RunLoop的运行模式</li>
+<li>一个 RunLoop 包含若干个 Mode</li>
+<li>每个Mode又包含若干个Source/Timer/Observer</li>
+<li>每次RunLoop启动时，只能指定其中一个 Mode，这个Mode被称作 CurrentMode. 这样做主要是为了分隔开不同组的Source/Timer/Observer，让其互不影响</li>
+<li>系统默认注册了5个Mode</li>
+<li>kCFRunLoopDefaultMode, App的默认Mode，通常主线程是在这个Mode下运行</li>
+<li>UITrackingRunLoopMode, 界面跟踪 Mode，用于 ScrollView 追踪触摸滑动，保证界面滑动时不受其他 Mode 影响</li>
+<li>UIInitializationRunLoopMode, 在刚启动 App 时进入的第一个 Mode，启动完成后就不再使用</li>
+<li>GSEventReceiveRunLoopMode, 接受系统事件的内部 Mode，通常用不到</li>
+<li>kCFRunLoopCommonModes, 这是一个占位用的Mode，不是一种真正的Mode</li>
+</ul>
+<h2>CFRunLoopSourceRef</h2>
+<ul>
+<li>事件源（输入源）</li>
+<li>以前的分法</li>
+<li>Port-Based Sources</li>
+<li>Custom Input Sources</li>
+<li>Cocoa Perform Selector Sources</li>
+<li>现在的分法</li>
+<li>Source0：非基于Port的</li>
+<li>Source1：基于Port的</li>
+</ul>
+<h2>CFRunLoopRef</h2>
+<ul>
+<li>代表的是 RunLoop 本身</li>
+</ul>
+<h2>CFRunLoopTimerRef</h2>
+<ul>
+<li>基于时间的触发器</li>
+<li>基本上说的就是NSTimer</li>
+</ul>
+<h2>CFRunLoopObserverRef</h2>
+<ul>
+<li>观察者</li>
+<li>能够监听RunLoop的状态改变</li>
+<li>可以监听的时间点</li>
+<li>kCFRunLoopEntry, 即将进入Loop</li>
+<li>kCFRunLoopBeforeSources, 即将处理Source</li>
+<li>kCFRunLoopBeforeTimers, 即将处理Timer</li>
+<li>kCFRunLoopBeforeWaiting, 即将进入休眠</li>
+<li>kCFRunLoopAfterWaiting, 刚从休眠中唤醒</li>
+<li>kCFRunLoopExit, 即将退出Loop</li>
+<li>kCFRunLoopAllActivities</li>
+</ul>
+<h1>RunLoop处理逻辑</h1>
+<p><em>苹果官方版</em></p>
+<p><img alt="" src="/assets/images/多线程/RunLoop处理逻辑1.png"></p>
+<p><em>网友翻译版</em></p>
+<p><img alt="" src="/assets/images/多线程/RunLoop处理逻辑2.png"></p>
+<p><em>网友整理版</em></p>
+<p><img alt="" src="/assets/images/多线程/RunLoop处理逻辑3.png"></p>
+<h1>RunLoop应用</h1>
+<ul>
+<li>NSTimer</li>
+<li>PerformSelector</li>
+<li>自动释放池</li>
+<li>常驻线程</li>
+</ul>
+<h1>RunLoop问题集锦</h1>
+<h2>什么是RunLoop</h2>
+<ul>
+<li>运行循环</li>
+<li>它内部就是do-while循环，在这个循环内部不断地处理各种任务(Source、Timer)</li>
+<li>一个线程对应一个RunLoop</li>
+<li>主线程的RunLoop默认已经启动</li>
+<li>子线程的RunLoop得手动启动, 调用run方法</li>
+<li>RunLoop只能选择一个Mode启动，如果当前Mode中没有任何Source(Sources0、Sources1)、Timer，那么就直接退出RunLoop</li>
+<li>通过Observer监听RunLoop的状态</li>
+</ul>
+<h2>自动释放池什么时候释放</h2>
+<ul>
+<li>通过Observer监听RunLoop的状态, 一旦监听到RunLoop即将进入睡眠等待状态, 就释放自动释放池(kCFRunLoopBeforeWaiting)释放内部对象, 然后马上创建一个空的新的自动释放池, 便于下次恢复运行直接使用</li>
+<li>kCFRunLoopEntry</li>
+<li>创建一个自动释放池</li>
+<li>第一次进入runloop的时候, 需要创建自动释放池</li>
+<li>kCFRunLoopBeforeWaiting, 销毁自动释放池, 创建一个新的自动释放池</li>
+<li>kCFRunLoopExit, 退出runloop的时候, 需要销毁自动释放池</li>
+</ul>
+<h2>如何使用RunLoop？有哪些应用场景？</h2>
+<ul>
+<li>开启一个常驻线程, 让一个子线程不进入消亡状态，等待其他线程发来消息，处理其他事件</li>
+<li>在子线程中开启一个定时器</li>
+<li>在子线程中进行一些长期监控</li>
+<li>可以控制定时器在特定模式下执行</li>
+<li>可以让某些事件（行为、任务）在特定模式下执行</li>
+<li>可以添加 Observer 监听 RunLoop 的状态, 比如监听点击事件的处理（在所有点击事件之前做一些事情）</li>
+</ul>
+<h1>参考</h1>
+<p><a href="http://blog.ibireme.com/2015/05/18/runloop/">深入理解RunLoop</a></p>
+</section>
+		</div>
+	</div> 	<!-- <hr> -->
+</div> <!-- /container -->
+<footer class="aw-footer bg-danger">
+	<div class="container"> <!-- footer -->
+		<div class="row">
+			<div class="col-md-10 col-md-offset-1">
+				<div class="row">
+					<div class="col-md-3">
+						<h4>Navigation</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="http://littlecaptain.net">Little Captain's Blog</a></li>
+							<li><a href="http://littlecaptain.net/pages/appde-tong-zhi-zhi-chi.html"><i class="fa fa-App的通知支持 "></i> App的通知支持</a></li>
+							<li><a href="http://littlecaptain.net/pages/block-zong-jie.html"><i class="fa fa-Block 总结 "></i> Block 总结</a></li>
+							<li><a href="http://littlecaptain.net/pages/building-c-applications.html"><i class="fa fa-Building C++ Applications "></i> Building C++ Applications</a></li>
+							<li><a href="http://littlecaptain.net/pages/gitshi-yong-jing-yan-ji-jin.html"><i class="fa fa-Git使用经验集锦 "></i> Git使用经验集锦</a></li>
+							<li><a href="http://littlecaptain.net/pages/gitji-ben-cao-zuo.html"><i class="fa fa-Git基本操作 "></i> Git基本操作</a></li>
+							<li><a href="http://littlecaptain.net/pages/javade-shu-ju-lei-xing.html"><i class="fa fa-Java的数据类型 "></i> Java的数据类型</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-1.html"><i class="fa fa-Lean Python(Chapter 1) "></i> Lean Python(Chapter 1)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-10.html"><i class="fa fa-Lean Python(Chapter 10) "></i> Lean Python(Chapter 10)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-11.html"><i class="fa fa-Lean Python(Chapter 11) "></i> Lean Python(Chapter 11)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-2.html"><i class="fa fa-Lean Python(Chapter 2) "></i> Lean Python(Chapter 2)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-3.html"><i class="fa fa-Lean Python(Chapter 3) "></i> Lean Python(Chapter 3)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-4.html"><i class="fa fa-Lean Python(Chapter 4) "></i> Lean Python(Chapter 4)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-5.html"><i class="fa fa-Lean Python(Chapter 5) "></i> Lean Python(Chapter 5)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-6.html"><i class="fa fa-Lean Python(Chapter 6) "></i> Lean Python(Chapter 6)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-7.html"><i class="fa fa-Lean Python(Chapter 7) "></i> Lean Python(Chapter 7)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-8.html"><i class="fa fa-Lean Python(Chapter 8) "></i> Lean Python(Chapter 8)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-9.html"><i class="fa fa-Lean Python(Chapter 9) "></i> Lean Python(Chapter 9)</a></li>
+							<li><a href="http://littlecaptain.net/pages/linuxren-wu-guan-li.html"><i class="fa fa-Linux任务管理 "></i> Linux任务管理</a></li>
+							<li><a href="http://littlecaptain.net/pages/nodejsgai-shu.html"><i class="fa fa-Node.js概述 "></i> Node.js概述</a></li>
+							<li><a href="http://littlecaptain.net/pages/objective-cdai-ma-gui-fan.html"><i class="fa fa-Objective-C代码规范 "></i> Objective-C代码规范</a></li>
+							<li><a href="http://littlecaptain.net/pages/phpkai-fa-appjie-kou.html"><i class="fa fa-PHP开发App接口 "></i> PHP开发App接口</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyinstallershi-yong-shou-ce.html"><i class="fa fa-PyInstaller使用手册 "></i> PyInstaller使用手册</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-color-dialog.html"><i class="fa fa-PyQT5 color dialog "></i> PyQT5 color dialog</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-input-dialog.html"><i class="fa fa-PyQT5 input dialog "></i> PyQT5 input dialog</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqtchapter-1.html"><i class="fa fa-PyQt(Chapter 1) "></i> PyQt(Chapter 1)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqtchapter-2.html"><i class="fa fa-PyQt(Chapter 2) "></i> PyQt(Chapter 2)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqtchapter-3.html"><i class="fa fa-PyQt(Chapter 3) "></i> PyQt(Chapter 3)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqtchapter-4.html"><i class="fa fa-PyQt(Chapter 4) "></i> PyQt(Chapter 4)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqtchapter-5.html"><i class="fa fa-PyQt(Chapter 5) "></i> PyQt(Chapter 5)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqtchapter-6.html"><i class="fa fa-PyQt(Chapter 6) "></i> PyQt(Chapter 6)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqtchapter-7.html"><i class="fa fa-PyQt(Chapter 7) "></i> PyQt(Chapter 7)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-directory-view.html"><i class="fa fa-PyQt5 Directory View "></i> PyQt5 Directory View</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-form-layout.html"><i class="fa fa-PyQt5 Form Layout "></i> PyQt5 Form Layout</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-matplotlib.html"><i class="fa fa-PyQt5 Matplotlib "></i> PyQt5 Matplotlib</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-qboxlayout.html"><i class="fa fa-PyQt5 QBoxLayout "></i> PyQt5 QBoxLayout</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-treeview.html"><i class="fa fa-PyQt5 Treeview "></i> PyQt5 Treeview</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-absolute-position.html"><i class="fa fa-PyQt5 absolute position "></i> PyQt5 absolute position</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-browser.html"><i class="fa fa-PyQt5 browser "></i> PyQt5 browser</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-buttons.html"><i class="fa fa-PyQt5 buttons "></i> PyQt5 buttons</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-colors.html"><i class="fa fa-PyQt5 colors "></i> PyQt5 colors</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-drag-and-drop.html"><i class="fa fa-PyQt5 drag and drop "></i> PyQt5 drag and drop</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-file-dialog.html"><i class="fa fa-PyQt5 file dialog "></i> PyQt5 file dialog</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-font-dialog.html"><i class="fa fa-PyQt5 font dialog "></i> PyQt5 font dialog</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-grid-layout.html"><i class="fa fa-PyQt5 grid layout "></i> PyQt5 grid layout</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-horizontal-layout.html"><i class="fa fa-PyQt5 horizontal layout "></i> PyQt5 horizontal layout</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-image.html"><i class="fa fa-PyQt5 image "></i> PyQt5 image</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-menu.html"><i class="fa fa-PyQt5 menu "></i> PyQt5 menu</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-messagebox.html"><i class="fa fa-PyQt5 messagebox "></i> PyQt5 messagebox</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-pixels.html"><i class="fa fa-PyQt5 pixels "></i> PyQt5 pixels</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-signals-and-slots.html"><i class="fa fa-PyQt5 signals and slots "></i> PyQt5 signals and slots</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-statusbar.html"><i class="fa fa-PyQt5 statusbar "></i> PyQt5 statusbar</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-table.html"><i class="fa fa-PyQt5 table "></i> PyQt5 table</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tabs.html"><i class="fa fa-PyQt5 tabs "></i> PyQt5 tabs</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-textbox.html"><i class="fa fa-PyQt5 textbox "></i> PyQt5 textbox</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialcustom-widgets.html"><i class="fa fa-PyQt5 tutorial(Custom widgets) "></i> PyQt5 tutorial(Custom widgets)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialdate-and-time.html"><i class="fa fa-PyQt5 tutorial(Date and time) "></i> PyQt5 tutorial(Date and time)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialdialogs.html"><i class="fa fa-PyQt5 tutorial(Dialogs) "></i> PyQt5 tutorial(Dialogs)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialdrag-drop.html"><i class="fa fa-PyQt5 tutorial(Drag & drop) "></i> PyQt5 tutorial(Drag & drop)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialevents-and-signals.html"><i class="fa fa-PyQt5 tutorial(Events and signals) "></i> PyQt5 tutorial(Events and signals)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialfirst-programs.html"><i class="fa fa-PyQt5 tutorial(First programs) "></i> PyQt5 tutorial(First programs)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialintroduction.html"><i class="fa fa-PyQt5 tutorial(Introduction) "></i> PyQt5 tutorial(Introduction)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutoriallayout-management.html"><i class="fa fa-PyQt5 tutorial(Layout management) "></i> PyQt5 tutorial(Layout management)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialmenus-and-toolbars.html"><i class="fa fa-PyQt5 tutorial(Menus and toolbars) "></i> PyQt5 tutorial(Menus and toolbars)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialpainting.html"><i class="fa fa-PyQt5 tutorial(Painting) "></i> PyQt5 tutorial(Painting)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialthe-tetris-game.html"><i class="fa fa-PyQt5 tutorial(The Tetris game) "></i> PyQt5 tutorial(The Tetris game)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialwidgets-ii.html"><i class="fa fa-PyQt5 tutorial(Widgets II) "></i> PyQt5 tutorial(Widgets II)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialwidgets.html"><i class="fa fa-PyQt5 tutorial(Widgets) "></i> PyQt5 tutorial(Widgets)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-window.html"><i class="fa fa-PyQt5 window "></i> PyQt5 window</a></li>
+							<li><a href="http://littlecaptain.net/pages/runloopjiu-zhe-yi-pian.html"><i class="fa fa-RunLoop就这一篇 "></i> RunLoop就这一篇</a></li>
+							<li><a href="http://littlecaptain.net/pages/svnji-ben-cao-zuo.html"><i class="fa fa-SVN基本操作 "></i> SVN基本操作</a></li>
+							<li><a href="http://littlecaptain.net/pages/uitableview-de-xing-neng-you-hua.html"><i class="fa fa-UITableView 的性能优化 "></i> UITableView 的性能优化</a></li>
+							<li><a href="http://littlecaptain.net/pages/xcodechang-jian-she-zhi-ji-jin.html"><i class="fa fa-Xcode常见设置集锦 "></i> Xcode常见设置集锦</a></li>
+							<li><a href="http://littlecaptain.net/pages/condade-ji-ben-shi-yong.html"><i class="fa fa-conda的基本使用 "></i> conda的基本使用</a></li>
+							<li><a href="http://littlecaptain.net/pages/gitchang-yong-ming-ling.html"><i class="fa fa-git常用命令 "></i> git常用命令</a></li>
+							<li><a href="http://littlecaptain.net/pages/hello-blog.html"><i class="fa fa-Hello Blog "></i> Hello Blog</a></li>
+							<li><a href="http://littlecaptain.net/pages/ioskai-fa-zhong-de-ge-chong-chi-cun.html"><i class="fa fa-iOS开发中的各种尺寸 "></i> iOS开发中的各种尺寸</a></li>
+							<li><a href="http://littlecaptain.net/pages/iosshu-ju-de-cun-chu-fang-shi.html"><i class="fa fa-iOS数据的存储方式 "></i> iOS数据的存储方式</a></li>
+							<li><a href="http://littlecaptain.net/pages/ioswen-jian-shang-chuan.html"><i class="fa fa-iOS文件上传 "></i> iOS文件上传</a></li>
+							<li><a href="http://littlecaptain.net/pages/ioswen-jian-xia-zai.html"><i class="fa fa-iOS文件下载 "></i> iOS文件下载</a></li>
+							<li><a href="http://littlecaptain.net/pages/iosjian-ce-wang-luo-zhuang-tai.html"><i class="fa fa-iOS监测网络状态 "></i> iOS监测网络状态</a></li>
+							<li><a href="http://littlecaptain.net/pages/ioswang-luo-http.html"><i class="fa fa-iOS网络-HTTP "></i> iOS网络-HTTP</a></li>
+							<li><a href="http://littlecaptain.net/pages/ioswang-luo-nsurlconnection.html"><i class="fa fa-iOS网络-NSURLConnection "></i> iOS网络-NSURLConnection</a></li>
+							<li><a href="http://littlecaptain.net/pages/ioswang-luo-nsurlsession.html"><i class="fa fa-iOS网络-NSURLSession "></i> iOS网络-NSURLSession</a></li>
+							<li><a href="http://littlecaptain.net/pages/ioswang-luo-ji-chu.html"><i class="fa fa-iOS网络-基础 "></i> iOS网络-基础</a></li>
+							<li><a href="http://littlecaptain.net/pages/iosjie-ya-suo.html"><i class="fa fa-iOS解压缩 "></i> iOS解压缩</a></li>
+							<li><a href="http://littlecaptain.net/pages/ipa-bao-zhong-de-png-wen-jian-de-zheng-chang-hua.html"><i class="fa fa-ipa 包中的 PNG 文件的正常化 "></i> ipa 包中的 PNG 文件的正常化</a></li>
+							<li><a href="http://littlecaptain.net/pages/nullablenonnull.html"><i class="fa fa-nullable&nonnull "></i> nullable&nonnull</a></li>
+							<li><a href="http://littlecaptain.net/pages/shellkong-zhi-yu-ju.html"><i class="fa fa-shell控制语句 "></i> shell控制语句</a></li>
+							<li><a href="http://littlecaptain.net/pages/shellshu-xue-yun-suan.html"><i class="fa fa-shell数学运算 "></i> shell数学运算</a></li>
+							<li><a href="http://littlecaptain.net/pages/shelljiao-ben-bian-cheng-ji-chu.html"><i class="fa fa-shell脚本编程基础 "></i> shell脚本编程基础</a></li>
+							<li><a href="http://littlecaptain.net/pages/yi-kuan-ji-yu-afnetworkingfeng-zhuang-de-wang-luo-kuang-jia.html"><i class="fa fa-一款基于AFNetworking封装的网络框架 "></i> 一款基于AFNetworking封装的网络框架</a></li>
+							<li><a href="http://littlecaptain.net/pages/fen-bu-shi-git-gong-zuo-liu-cheng.html"><i class="fa fa-分布式Git - 工作流程 "></i> 分布式Git - 工作流程</a></li>
+							<li><a href="http://littlecaptain.net/pages/fa-bu-kuang-jia-dao-cocoapodsshang.html"><i class="fa fa-发布框架到CocoaPods上 "></i> 发布框架到CocoaPods上</a></li>
+							<li><a href="http://littlecaptain.net/pages/ming-ling-ti-shi-fu-de-ge-shi.html"><i class="fa fa-命令提示符的格式 "></i> 命令提示符的格式</a></li>
+							<li><a href="http://littlecaptain.net/pages/zai-windowsping-tai-da-jian-gogsfu-wu.html"><i class="fa fa-在Windows平台搭建gogs服务 "></i> 在Windows平台搭建gogs服务</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-gcdzong-jie.html"><i class="fa fa-多线程-GCD总结 "></i> 多线程-GCD总结</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-nsoperationzong-jie.html"><i class="fa fa-多线程-NSOperation总结 "></i> 多线程-NSOperation总结</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-nsthreadde-shi-yong.html"><i class="fa fa-多线程-NSThread的使用 "></i> 多线程-NSThread的使用</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-ioszhong-de-zhu-xian-cheng.html"><i class="fa fa-多线程-iOS中的主线程 "></i> 多线程-iOS中的主线程</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-ioszhong-de-shi-xian-fang-an.html"><i class="fa fa-多线程-iOS中的实现方案 "></i> 多线程-iOS中的实现方案</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-ji-ben-gai-nian-he-yuan-li.html"><i class="fa fa-多线程-基本概念和原理 "></i> 多线程-基本概念和原理</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-an-quan-yin-huan.html"><i class="fa fa-多线程-安全隐患 "></i> 多线程-安全隐患</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-xian-cheng-jian-tong-xin.html"><i class="fa fa-多线程-线程间通信 "></i> 多线程-线程间通信</a></li>
+							<li><a href="http://littlecaptain.net/pages/da-jian-gitfu-wu-qi.html"><i class="fa fa-搭建git服务器 "></i> 搭建git服务器</a></li>
+							<li><a href="http://littlecaptain.net/pages/ben-di-tui-song-tong-zhi.html"><i class="fa fa-本地推送通知 "></i> 本地推送通知</a></li>
+							<li><a href="http://littlecaptain.net/pages/zheng-ze-biao-da-shi-ji-chu.html"><i class="fa fa-正则表达式基础 "></i> 正则表达式基础</a></li>
+							<li><a href="http://littlecaptain.net/pages/huan-xin-ni-cheng-he-tou-xiang-de-chu-li.html"><i class="fa fa-环信昵称和头像的处理 "></i> 环信昵称和头像的处理</a></li>
+							<li><a href="http://littlecaptain.net/pages/wang-luo-ji-ben-gai-nian.html"><i class="fa fa-网络基本概念 "></i> 网络基本概念</a></li>
+							<li><a href="http://littlecaptain.net/pages/wang-luo-mo-xing.html"><i class="fa fa-网络模型 "></i> 网络模型</a></li>
+							<li><a href="http://littlecaptain.net/pages/liao-liao-ios-de-mvc-jia-gou.html"><i class="fa fa-聊聊 iOS 的 MVC 架构 "></i> 聊聊 iOS 的 MVC 架构</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Author</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="#">You can add links in your config file</a></li>
+							<li><a href="#">Another social link</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Categories</h4>
+						<ul class="list-unstyled my-list-style">
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Links</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="http://getpelican.com/">Pelican</a></li>
+							<li><a href="http://python.org/">Python.org</a></li>
+							<li><a href="http://jinja.pocoo.org/">Jinja2</a></li>
+							<li><a href="#">You can modify those links in your config file</a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</footer>
+<div class="container">
+	<div class="row">
+		<div class="col-md-12 text-center center-block aw-bottom">
+			<p>&copy; Little Captain 2016</p>
+			<p>Powered by Pelican</p>
+		</div>
+	</div>
+</div>
+<!-- JavaScript -->
+<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+	$("div.collapseheader").click(function () {
+		$header = $(this).children("span").first();
+		$codearea = $(this).children(".input_area");
+		$codearea.slideToggle(500, function () {
+			$header.text(function () {
+				return $codearea.is(":visible") ? "Collapse Code" : "Expand Code";
+			});
+		});
+	});
+});
+</script>
+</body>
+</html>

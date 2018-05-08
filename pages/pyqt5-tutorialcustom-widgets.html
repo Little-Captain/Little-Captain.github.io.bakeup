@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+	<meta charset="utf-8">
+	<title>PyQt5 tutorial(Custom widgets) — Little Captain's Blog </title>
+	<meta name="description" content="">
+	<meta name="author" content="Little Captain">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+	<!--[if lt IE 9]>
+		<script src="http://littlecaptain.net/theme/html5.js"></script>
+		<![endif]-->
+	<link href="http://littlecaptain.net/theme/css/ipython.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/bootswatch/3.2.0/simplex/bootstrap.min.css" rel="stylesheet">
+	<link href="http://littlecaptain.net/theme/css/local.css" rel="stylesheet">
+	<link href="http://littlecaptain.net/theme/css/pygments.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+	<div class="page-header">
+		<h1><a href="http://littlecaptain.net/">Little Captain's Blog</a>
+			<br>	</div>
+	<div class="row">
+		<div class="col-md-8 col-md-offset-2">
+        
+<section id="content" class="body">    
+    <ul>
+<li>Python</li>
+<li>PyQt</li>
+</ul>
+<hr>
+<blockquote>
+<p>Custom widgets are created by using the drawing tools provided by the toolkit. There are two basic possibilities: a programmer can modify or enhance an existing widget or he can create a custom widget from scratch.</p>
+</blockquote>
+<!-- more -->
+
+<h1>Burning widget</h1>
+<blockquote>
+<p>This is a widget that we can see in Nero, K3B, or other CD/DVD burning software.</p>
+</blockquote>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">PyQt5.QtWidgets</span> <span class="kn">import</span> <span class="p">(</span><span class="n">QWidget</span><span class="p">,</span> <span class="n">QSlider</span><span class="p">,</span> <span class="n">QApplication</span><span class="p">,</span>
+                             <span class="n">QHBoxLayout</span><span class="p">,</span> <span class="n">QVBoxLayout</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">PyQt5.QtCore</span> <span class="kn">import</span> <span class="n">QObject</span><span class="p">,</span> <span class="n">Qt</span><span class="p">,</span> <span class="n">pyqtSignal</span>
+<span class="kn">from</span> <span class="nn">PyQt5.QtGui</span> <span class="kn">import</span> <span class="n">QPainter</span><span class="p">,</span> <span class="n">QFont</span><span class="p">,</span> <span class="n">QColor</span><span class="p">,</span> <span class="n">QPen</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+
+<span class="k">class</span> <span class="nc">Communicate</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
+    <span class="n">updateBW</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">BurningWidget</span><span class="p">(</span><span class="n">QWidget</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">initUI</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">initUI</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setMinimumSize</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="mi">75</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num</span> <span class="o">=</span> <span class="p">[</span><span class="mi">75</span><span class="p">,</span> <span class="mi">150</span><span class="p">,</span> <span class="mi">225</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">375</span><span class="p">,</span> <span class="mi">450</span><span class="p">,</span> <span class="mi">525</span><span class="p">,</span> <span class="mi">600</span><span class="p">,</span> <span class="mi">675</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">setValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">paintEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e</span><span class="p">):</span>
+
+        <span class="n">qp</span> <span class="o">=</span> <span class="n">QPainter</span><span class="p">()</span>
+        <span class="n">qp</span><span class="o">.</span><span class="n">begin</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">drawWidget</span><span class="p">(</span><span class="n">qp</span><span class="p">)</span>
+        <span class="n">qp</span><span class="o">.</span><span class="n">end</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">drawWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qp</span><span class="p">):</span>
+
+        <span class="n">MAX_CAPACITY</span> <span class="o">=</span> <span class="mi">700</span>
+        <span class="n">OVER_CAPACITY</span> <span class="o">=</span> <span class="mi">750</span>
+
+        <span class="n">font</span> <span class="o">=</span> <span class="n">QFont</span><span class="p">(</span><span class="s1">&#39;Serif&#39;</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="n">QFont</span><span class="o">.</span><span class="n">Light</span><span class="p">)</span>
+        <span class="n">qp</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">font</span><span class="p">)</span>
+
+        <span class="c1"># We draw the widget dynamically.</span>
+        <span class="c1"># The greater is the window,</span>
+        <span class="c1"># the greater is the burning widget</span>
+        <span class="c1"># and vice versa. That is why we must calculate</span>
+        <span class="c1"># the size of the widget onto which we draw the custom widget.</span>
+        <span class="c1"># The till parameter determines the total size to be drawn.</span>
+        <span class="c1"># This value comes from the slider widget.</span>
+        <span class="c1"># It is a proportion of the whole area.</span>
+        <span class="c1"># The full parameter determines the point</span>
+        <span class="c1"># where we begin to draw in red colour.</span>
+
+        <span class="c1"># The actual drawing consists of three steps.</span>
+        <span class="c1"># We draw the yellow or the red and yellow rectangle.</span>
+        <span class="c1"># Then we draw the vertical lines which divide</span>
+        <span class="c1"># the widget into several parts.</span>
+        <span class="c1"># Finally, we draw the numbers which indicate the capacity of the medium.</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">size</span><span class="o">.</span><span class="n">width</span><span class="p">()</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">size</span><span class="o">.</span><span class="n">height</span><span class="p">()</span>
+
+        <span class="n">step</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">w</span> <span class="o">/</span> <span class="mi">10</span><span class="p">))</span>
+
+        <span class="n">till</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(((</span><span class="n">w</span> <span class="o">/</span> <span class="n">OVER_CAPACITY</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+        <span class="n">full</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(((</span><span class="n">w</span> <span class="o">/</span> <span class="n">OVER_CAPACITY</span><span class="p">)</span> <span class="o">*</span> <span class="n">MAX_CAPACITY</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">&gt;=</span> <span class="n">MAX_CAPACITY</span><span class="p">:</span>
+
+            <span class="n">qp</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">QColor</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+            <span class="n">qp</span><span class="o">.</span><span class="n">setBrush</span><span class="p">(</span><span class="n">QColor</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">184</span><span class="p">))</span>
+            <span class="n">qp</span><span class="o">.</span><span class="n">drawRect</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">full</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
+            <span class="n">qp</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">QColor</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">175</span><span class="p">,</span> <span class="mi">175</span><span class="p">))</span>
+            <span class="n">qp</span><span class="o">.</span><span class="n">setBrush</span><span class="p">(</span><span class="n">QColor</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">175</span><span class="p">,</span> <span class="mi">175</span><span class="p">))</span>
+            <span class="n">qp</span><span class="o">.</span><span class="n">drawRect</span><span class="p">(</span><span class="n">full</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">till</span> <span class="o">-</span> <span class="n">full</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="n">qp</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">QColor</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+            <span class="n">qp</span><span class="o">.</span><span class="n">setBrush</span><span class="p">(</span><span class="n">QColor</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">184</span><span class="p">))</span>
+            <span class="n">qp</span><span class="o">.</span><span class="n">drawRect</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">till</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
+
+        <span class="n">pen</span> <span class="o">=</span> <span class="n">QPen</span><span class="p">(</span><span class="n">QColor</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span>
+                   <span class="n">Qt</span><span class="o">.</span><span class="n">SolidLine</span><span class="p">)</span>
+
+        <span class="n">qp</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">pen</span><span class="p">)</span>
+        <span class="n">qp</span><span class="o">.</span><span class="n">setBrush</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">NoBrush</span><span class="p">)</span>
+        <span class="n">qp</span><span class="o">.</span><span class="n">drawRect</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">w</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">h</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">step</span><span class="p">,</span> <span class="n">step</span><span class="p">):</span>
+            <span class="n">qp</span><span class="o">.</span><span class="n">drawLine</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+            <span class="n">metrics</span> <span class="o">=</span> <span class="n">qp</span><span class="o">.</span><span class="n">fontMetrics</span><span class="p">()</span>
+            <span class="n">fw</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">width</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num</span><span class="p">[</span><span class="n">j</span><span class="p">]))</span>
+            <span class="n">qp</span><span class="o">.</span><span class="n">drawText</span><span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="n">fw</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">h</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num</span><span class="p">[</span><span class="n">j</span><span class="p">]))</span>
+            <span class="n">j</span> <span class="o">=</span> <span class="n">j</span> <span class="o">+</span> <span class="mi">1</span>
+
+
+<span class="k">class</span> <span class="nc">Example</span><span class="p">(</span><span class="n">QWidget</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">initUI</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">initUI</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">OVER_CAPACITY</span> <span class="o">=</span> <span class="mi">750</span>
+
+        <span class="n">sld</span> <span class="o">=</span> <span class="n">QSlider</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">Horizontal</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">sld</span><span class="o">.</span><span class="n">setFocusPolicy</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">NoFocus</span><span class="p">)</span>
+        <span class="n">sld</span><span class="o">.</span><span class="n">setRange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">OVER_CAPACITY</span><span class="p">)</span>
+        <span class="n">sld</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="mi">75</span><span class="p">)</span>
+        <span class="n">sld</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">150</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">c</span> <span class="o">=</span> <span class="n">Communicate</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wid</span> <span class="o">=</span> <span class="n">BurningWidget</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">updateBW</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wid</span><span class="o">.</span><span class="n">setValue</span><span class="p">)</span>
+
+        <span class="n">sld</span><span class="o">.</span><span class="n">valueChanged</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">changeValue</span><span class="p">)</span>
+        <span class="n">hbox</span> <span class="o">=</span> <span class="n">QHBoxLayout</span><span class="p">()</span>
+        <span class="n">hbox</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wid</span><span class="p">)</span>
+        <span class="n">vbox</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">()</span>
+        <span class="n">vbox</span><span class="o">.</span><span class="n">addStretch</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">vbox</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="n">hbox</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">vbox</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">390</span><span class="p">,</span> <span class="mi">210</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s1">&#39;Burning widget&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">changeValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">updateBW</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wid</span><span class="o">.</span><span class="n">repaint</span><span class="p">()</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+    <span class="n">ex</span> <span class="o">=</span> <span class="n">Example</span><span class="p">()</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">exec_</span><span class="p">())</span>
+</pre></div>
+</section>
+		</div>
+	</div> 	<!-- <hr> -->
+</div> <!-- /container -->
+<footer class="aw-footer bg-danger">
+	<div class="container"> <!-- footer -->
+		<div class="row">
+			<div class="col-md-10 col-md-offset-1">
+				<div class="row">
+					<div class="col-md-3">
+						<h4>Navigation</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="http://littlecaptain.net">Little Captain's Blog</a></li>
+							<li><a href="http://littlecaptain.net/pages/appde-tong-zhi-zhi-chi.html"><i class="fa fa-App的通知支持 "></i> App的通知支持</a></li>
+							<li><a href="http://littlecaptain.net/pages/block-zong-jie.html"><i class="fa fa-Block 总结 "></i> Block 总结</a></li>
+							<li><a href="http://littlecaptain.net/pages/building-c-applications.html"><i class="fa fa-Building C++ Applications "></i> Building C++ Applications</a></li>
+							<li><a href="http://littlecaptain.net/pages/gitshi-yong-jing-yan-ji-jin.html"><i class="fa fa-Git使用经验集锦 "></i> Git使用经验集锦</a></li>
+							<li><a href="http://littlecaptain.net/pages/gitji-ben-cao-zuo.html"><i class="fa fa-Git基本操作 "></i> Git基本操作</a></li>
+							<li><a href="http://littlecaptain.net/pages/javade-shu-ju-lei-xing.html"><i class="fa fa-Java的数据类型 "></i> Java的数据类型</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-1.html"><i class="fa fa-Lean Python(Chapter 1) "></i> Lean Python(Chapter 1)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-10.html"><i class="fa fa-Lean Python(Chapter 10) "></i> Lean Python(Chapter 10)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-11.html"><i class="fa fa-Lean Python(Chapter 11) "></i> Lean Python(Chapter 11)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-2.html"><i class="fa fa-Lean Python(Chapter 2) "></i> Lean Python(Chapter 2)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-3.html"><i class="fa fa-Lean Python(Chapter 3) "></i> Lean Python(Chapter 3)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-4.html"><i class="fa fa-Lean Python(Chapter 4) "></i> Lean Python(Chapter 4)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-5.html"><i class="fa fa-Lean Python(Chapter 5) "></i> Lean Python(Chapter 5)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-6.html"><i class="fa fa-Lean Python(Chapter 6) "></i> Lean Python(Chapter 6)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-7.html"><i class="fa fa-Lean Python(Chapter 7) "></i> Lean Python(Chapter 7)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-8.html"><i class="fa fa-Lean Python(Chapter 8) "></i> Lean Python(Chapter 8)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-9.html"><i class="fa fa-Lean Python(Chapter 9) "></i> Lean Python(Chapter 9)</a></li>
+							<li><a href="http://littlecaptain.net/pages/linuxren-wu-guan-li.html"><i class="fa fa-Linux任务管理 "></i> Linux任务管理</a></li>
+							<li><a href="http://littlecaptain.net/pages/nodejsgai-shu.html"><i class="fa fa-Node.js概述 "></i> Node.js概述</a></li>
+							<li><a href="http://littlecaptain.net/pages/objective-cdai-ma-gui-fan.html"><i class="fa fa-Objective-C代码规范 "></i> Objective-C代码规范</a></li>
+							<li><a href="http://littlecaptain.net/pages/phpkai-fa-appjie-kou.html"><i class="fa fa-PHP开发App接口 "></i> PHP开发App接口</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyinstallershi-yong-shou-ce.html"><i class="fa fa-PyInstaller使用手册 "></i> PyInstaller使用手册</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-color-dialog.html"><i class="fa fa-PyQT5 color dialog "></i> PyQT5 color dialog</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-input-dialog.html"><i class="fa fa-PyQT5 input dialog "></i> PyQT5 input dialog</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqtchapter-1.html"><i class="fa fa-PyQt(Chapter 1) "></i> PyQt(Chapter 1)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqtchapter-2.html"><i class="fa fa-PyQt(Chapter 2) "></i> PyQt(Chapter 2)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqtchapter-3.html"><i class="fa fa-PyQt(Chapter 3) "></i> PyQt(Chapter 3)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqtchapter-4.html"><i class="fa fa-PyQt(Chapter 4) "></i> PyQt(Chapter 4)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqtchapter-5.html"><i class="fa fa-PyQt(Chapter 5) "></i> PyQt(Chapter 5)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqtchapter-6.html"><i class="fa fa-PyQt(Chapter 6) "></i> PyQt(Chapter 6)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqtchapter-7.html"><i class="fa fa-PyQt(Chapter 7) "></i> PyQt(Chapter 7)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-directory-view.html"><i class="fa fa-PyQt5 Directory View "></i> PyQt5 Directory View</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-form-layout.html"><i class="fa fa-PyQt5 Form Layout "></i> PyQt5 Form Layout</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-matplotlib.html"><i class="fa fa-PyQt5 Matplotlib "></i> PyQt5 Matplotlib</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-qboxlayout.html"><i class="fa fa-PyQt5 QBoxLayout "></i> PyQt5 QBoxLayout</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-treeview.html"><i class="fa fa-PyQt5 Treeview "></i> PyQt5 Treeview</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-absolute-position.html"><i class="fa fa-PyQt5 absolute position "></i> PyQt5 absolute position</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-browser.html"><i class="fa fa-PyQt5 browser "></i> PyQt5 browser</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-buttons.html"><i class="fa fa-PyQt5 buttons "></i> PyQt5 buttons</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-colors.html"><i class="fa fa-PyQt5 colors "></i> PyQt5 colors</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-drag-and-drop.html"><i class="fa fa-PyQt5 drag and drop "></i> PyQt5 drag and drop</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-file-dialog.html"><i class="fa fa-PyQt5 file dialog "></i> PyQt5 file dialog</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-font-dialog.html"><i class="fa fa-PyQt5 font dialog "></i> PyQt5 font dialog</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-grid-layout.html"><i class="fa fa-PyQt5 grid layout "></i> PyQt5 grid layout</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-horizontal-layout.html"><i class="fa fa-PyQt5 horizontal layout "></i> PyQt5 horizontal layout</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-image.html"><i class="fa fa-PyQt5 image "></i> PyQt5 image</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-menu.html"><i class="fa fa-PyQt5 menu "></i> PyQt5 menu</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-messagebox.html"><i class="fa fa-PyQt5 messagebox "></i> PyQt5 messagebox</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-pixels.html"><i class="fa fa-PyQt5 pixels "></i> PyQt5 pixels</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-signals-and-slots.html"><i class="fa fa-PyQt5 signals and slots "></i> PyQt5 signals and slots</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-statusbar.html"><i class="fa fa-PyQt5 statusbar "></i> PyQt5 statusbar</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-table.html"><i class="fa fa-PyQt5 table "></i> PyQt5 table</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tabs.html"><i class="fa fa-PyQt5 tabs "></i> PyQt5 tabs</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-textbox.html"><i class="fa fa-PyQt5 textbox "></i> PyQt5 textbox</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialcustom-widgets.html"><i class="fa fa-PyQt5 tutorial(Custom widgets) "></i> PyQt5 tutorial(Custom widgets)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialdate-and-time.html"><i class="fa fa-PyQt5 tutorial(Date and time) "></i> PyQt5 tutorial(Date and time)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialdialogs.html"><i class="fa fa-PyQt5 tutorial(Dialogs) "></i> PyQt5 tutorial(Dialogs)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialdrag-drop.html"><i class="fa fa-PyQt5 tutorial(Drag & drop) "></i> PyQt5 tutorial(Drag & drop)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialevents-and-signals.html"><i class="fa fa-PyQt5 tutorial(Events and signals) "></i> PyQt5 tutorial(Events and signals)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialfirst-programs.html"><i class="fa fa-PyQt5 tutorial(First programs) "></i> PyQt5 tutorial(First programs)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialintroduction.html"><i class="fa fa-PyQt5 tutorial(Introduction) "></i> PyQt5 tutorial(Introduction)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutoriallayout-management.html"><i class="fa fa-PyQt5 tutorial(Layout management) "></i> PyQt5 tutorial(Layout management)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialmenus-and-toolbars.html"><i class="fa fa-PyQt5 tutorial(Menus and toolbars) "></i> PyQt5 tutorial(Menus and toolbars)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialpainting.html"><i class="fa fa-PyQt5 tutorial(Painting) "></i> PyQt5 tutorial(Painting)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialthe-tetris-game.html"><i class="fa fa-PyQt5 tutorial(The Tetris game) "></i> PyQt5 tutorial(The Tetris game)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialwidgets-ii.html"><i class="fa fa-PyQt5 tutorial(Widgets II) "></i> PyQt5 tutorial(Widgets II)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialwidgets.html"><i class="fa fa-PyQt5 tutorial(Widgets) "></i> PyQt5 tutorial(Widgets)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-window.html"><i class="fa fa-PyQt5 window "></i> PyQt5 window</a></li>
+							<li><a href="http://littlecaptain.net/pages/runloopjiu-zhe-yi-pian.html"><i class="fa fa-RunLoop就这一篇 "></i> RunLoop就这一篇</a></li>
+							<li><a href="http://littlecaptain.net/pages/svnji-ben-cao-zuo.html"><i class="fa fa-SVN基本操作 "></i> SVN基本操作</a></li>
+							<li><a href="http://littlecaptain.net/pages/uitableview-de-xing-neng-you-hua.html"><i class="fa fa-UITableView 的性能优化 "></i> UITableView 的性能优化</a></li>
+							<li><a href="http://littlecaptain.net/pages/xcodechang-jian-she-zhi-ji-jin.html"><i class="fa fa-Xcode常见设置集锦 "></i> Xcode常见设置集锦</a></li>
+							<li><a href="http://littlecaptain.net/pages/condade-ji-ben-shi-yong.html"><i class="fa fa-conda的基本使用 "></i> conda的基本使用</a></li>
+							<li><a href="http://littlecaptain.net/pages/gitchang-yong-ming-ling.html"><i class="fa fa-git常用命令 "></i> git常用命令</a></li>
+							<li><a href="http://littlecaptain.net/pages/hello-blog.html"><i class="fa fa-Hello Blog "></i> Hello Blog</a></li>
+							<li><a href="http://littlecaptain.net/pages/ioskai-fa-zhong-de-ge-chong-chi-cun.html"><i class="fa fa-iOS开发中的各种尺寸 "></i> iOS开发中的各种尺寸</a></li>
+							<li><a href="http://littlecaptain.net/pages/iosshu-ju-de-cun-chu-fang-shi.html"><i class="fa fa-iOS数据的存储方式 "></i> iOS数据的存储方式</a></li>
+							<li><a href="http://littlecaptain.net/pages/ioswen-jian-shang-chuan.html"><i class="fa fa-iOS文件上传 "></i> iOS文件上传</a></li>
+							<li><a href="http://littlecaptain.net/pages/ioswen-jian-xia-zai.html"><i class="fa fa-iOS文件下载 "></i> iOS文件下载</a></li>
+							<li><a href="http://littlecaptain.net/pages/iosjian-ce-wang-luo-zhuang-tai.html"><i class="fa fa-iOS监测网络状态 "></i> iOS监测网络状态</a></li>
+							<li><a href="http://littlecaptain.net/pages/ioswang-luo-http.html"><i class="fa fa-iOS网络-HTTP "></i> iOS网络-HTTP</a></li>
+							<li><a href="http://littlecaptain.net/pages/ioswang-luo-nsurlconnection.html"><i class="fa fa-iOS网络-NSURLConnection "></i> iOS网络-NSURLConnection</a></li>
+							<li><a href="http://littlecaptain.net/pages/ioswang-luo-nsurlsession.html"><i class="fa fa-iOS网络-NSURLSession "></i> iOS网络-NSURLSession</a></li>
+							<li><a href="http://littlecaptain.net/pages/ioswang-luo-ji-chu.html"><i class="fa fa-iOS网络-基础 "></i> iOS网络-基础</a></li>
+							<li><a href="http://littlecaptain.net/pages/iosjie-ya-suo.html"><i class="fa fa-iOS解压缩 "></i> iOS解压缩</a></li>
+							<li><a href="http://littlecaptain.net/pages/ipa-bao-zhong-de-png-wen-jian-de-zheng-chang-hua.html"><i class="fa fa-ipa 包中的 PNG 文件的正常化 "></i> ipa 包中的 PNG 文件的正常化</a></li>
+							<li><a href="http://littlecaptain.net/pages/nullablenonnull.html"><i class="fa fa-nullable&nonnull "></i> nullable&nonnull</a></li>
+							<li><a href="http://littlecaptain.net/pages/shellkong-zhi-yu-ju.html"><i class="fa fa-shell控制语句 "></i> shell控制语句</a></li>
+							<li><a href="http://littlecaptain.net/pages/shellshu-xue-yun-suan.html"><i class="fa fa-shell数学运算 "></i> shell数学运算</a></li>
+							<li><a href="http://littlecaptain.net/pages/shelljiao-ben-bian-cheng-ji-chu.html"><i class="fa fa-shell脚本编程基础 "></i> shell脚本编程基础</a></li>
+							<li><a href="http://littlecaptain.net/pages/yi-kuan-ji-yu-afnetworkingfeng-zhuang-de-wang-luo-kuang-jia.html"><i class="fa fa-一款基于AFNetworking封装的网络框架 "></i> 一款基于AFNetworking封装的网络框架</a></li>
+							<li><a href="http://littlecaptain.net/pages/fen-bu-shi-git-gong-zuo-liu-cheng.html"><i class="fa fa-分布式Git - 工作流程 "></i> 分布式Git - 工作流程</a></li>
+							<li><a href="http://littlecaptain.net/pages/fa-bu-kuang-jia-dao-cocoapodsshang.html"><i class="fa fa-发布框架到CocoaPods上 "></i> 发布框架到CocoaPods上</a></li>
+							<li><a href="http://littlecaptain.net/pages/ming-ling-ti-shi-fu-de-ge-shi.html"><i class="fa fa-命令提示符的格式 "></i> 命令提示符的格式</a></li>
+							<li><a href="http://littlecaptain.net/pages/zai-windowsping-tai-da-jian-gogsfu-wu.html"><i class="fa fa-在Windows平台搭建gogs服务 "></i> 在Windows平台搭建gogs服务</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-gcdzong-jie.html"><i class="fa fa-多线程-GCD总结 "></i> 多线程-GCD总结</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-nsoperationzong-jie.html"><i class="fa fa-多线程-NSOperation总结 "></i> 多线程-NSOperation总结</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-nsthreadde-shi-yong.html"><i class="fa fa-多线程-NSThread的使用 "></i> 多线程-NSThread的使用</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-ioszhong-de-zhu-xian-cheng.html"><i class="fa fa-多线程-iOS中的主线程 "></i> 多线程-iOS中的主线程</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-ioszhong-de-shi-xian-fang-an.html"><i class="fa fa-多线程-iOS中的实现方案 "></i> 多线程-iOS中的实现方案</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-ji-ben-gai-nian-he-yuan-li.html"><i class="fa fa-多线程-基本概念和原理 "></i> 多线程-基本概念和原理</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-an-quan-yin-huan.html"><i class="fa fa-多线程-安全隐患 "></i> 多线程-安全隐患</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-xian-cheng-jian-tong-xin.html"><i class="fa fa-多线程-线程间通信 "></i> 多线程-线程间通信</a></li>
+							<li><a href="http://littlecaptain.net/pages/da-jian-gitfu-wu-qi.html"><i class="fa fa-搭建git服务器 "></i> 搭建git服务器</a></li>
+							<li><a href="http://littlecaptain.net/pages/ben-di-tui-song-tong-zhi.html"><i class="fa fa-本地推送通知 "></i> 本地推送通知</a></li>
+							<li><a href="http://littlecaptain.net/pages/zheng-ze-biao-da-shi-ji-chu.html"><i class="fa fa-正则表达式基础 "></i> 正则表达式基础</a></li>
+							<li><a href="http://littlecaptain.net/pages/huan-xin-ni-cheng-he-tou-xiang-de-chu-li.html"><i class="fa fa-环信昵称和头像的处理 "></i> 环信昵称和头像的处理</a></li>
+							<li><a href="http://littlecaptain.net/pages/wang-luo-ji-ben-gai-nian.html"><i class="fa fa-网络基本概念 "></i> 网络基本概念</a></li>
+							<li><a href="http://littlecaptain.net/pages/wang-luo-mo-xing.html"><i class="fa fa-网络模型 "></i> 网络模型</a></li>
+							<li><a href="http://littlecaptain.net/pages/liao-liao-ios-de-mvc-jia-gou.html"><i class="fa fa-聊聊 iOS 的 MVC 架构 "></i> 聊聊 iOS 的 MVC 架构</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Author</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="#">You can add links in your config file</a></li>
+							<li><a href="#">Another social link</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Categories</h4>
+						<ul class="list-unstyled my-list-style">
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Links</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="http://getpelican.com/">Pelican</a></li>
+							<li><a href="http://python.org/">Python.org</a></li>
+							<li><a href="http://jinja.pocoo.org/">Jinja2</a></li>
+							<li><a href="#">You can modify those links in your config file</a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</footer>
+<div class="container">
+	<div class="row">
+		<div class="col-md-12 text-center center-block aw-bottom">
+			<p>&copy; Little Captain 2016</p>
+			<p>Powered by Pelican</p>
+		</div>
+	</div>
+</div>
+<!-- JavaScript -->
+<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+	$("div.collapseheader").click(function () {
+		$header = $(this).children("span").first();
+		$codearea = $(this).children(".input_area");
+		$codearea.slideToggle(500, function () {
+			$header.text(function () {
+				return $codearea.is(":visible") ? "Collapse Code" : "Expand Code";
+			});
+		});
+	});
+});
+</script>
+</body>
+</html>

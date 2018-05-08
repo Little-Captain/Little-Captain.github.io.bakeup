@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+	<meta charset="utf-8">
+	<title>PyQt(Chapter 3) — Little Captain's Blog </title>
+	<meta name="description" content="">
+	<meta name="author" content="Little Captain">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+	<!--[if lt IE 9]>
+		<script src="http://littlecaptain.net/theme/html5.js"></script>
+		<![endif]-->
+	<link href="http://littlecaptain.net/theme/css/ipython.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/bootswatch/3.2.0/simplex/bootstrap.min.css" rel="stylesheet">
+	<link href="http://littlecaptain.net/theme/css/local.css" rel="stylesheet">
+	<link href="http://littlecaptain.net/theme/css/pygments.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+	<div class="page-header">
+		<h1><a href="http://littlecaptain.net/">Little Captain's Blog</a>
+			<br>	</div>
+	<div class="row">
+		<div class="col-md-8 col-md-offset-2">
+        
+<section id="content" class="body">    
+    <ul>
+<li>Python</li>
+<li>PyQt</li>
+</ul>
+<hr>
+<h1>Sequence</h1>
+<ul>
+<li>有序</li>
+<li>通过索引定位</li>
+<li>切片操作取出子 sequence</li>
+<li>String、Tuple(至少含有两个元素, (1) 为 int 1) 不可变(创建后, 元素不可变), List 可变</li>
+<li><code>+</code> <code>*</code> <code>[]</code> 是所有 sequence 通用的操作符</li>
+<li><code>+</code> 连接</li>
+<li><code>*</code> 重复序列, 产生新的序列</li>
+<li><code>[]</code> 取出指定的元素和子 sequence</li>
+</ul>
+<!-- more -->
+
+<div class="highlight"><pre><span></span><span class="c1"># +</span>
+<span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="c1"># [1, 1, 1, 2]</span>
+<span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="c1"># [1, 2, 1, 2]</span>
+<span class="s1">&#39;12&#39;</span> <span class="o">+</span> <span class="s1">&#39;12&#39;</span> <span class="c1"># &#39;1212&#39;</span>
+<span class="c1"># *</span>
+<span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span> <span class="c1"># [1, 2, 1, 2, 1, 2]</span>
+<span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="mi">3</span> <span class="c1"># (1, 2, 1, 2, 1, 2)</span>
+<span class="s1">&#39;12&#39;</span> <span class="o">*</span> <span class="mi">3</span> <span class="c1"># &#39;121212&#39;</span>
+<span class="c1"># []</span>
+<span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">][</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="c1"># [2, 3]</span>
+<span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="c1"># (2, 3)</span>
+<span class="s1">&#39;12312312&#39;</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="c1"># &#39;23&#39;</span>
+</pre></div>
+
+
+<h1>字符串</h1>
+<ul>
+<li><code>'</code> <code>"</code> <code>'''</code> <code>"""</code></li>
+<li>
+<p>字符串以 <code>\0</code> 结束</p>
+</li>
+<li>
+<p>不可变</p>
+</li>
+<li>当你对字符串执行一个操作时, 将创建一个新字符串</li>
+</ul>
+<div class="highlight"><pre><span></span><span class="n">k</span> <span class="o">=</span> <span class="s1">&#39;Hello World!&#39;</span>
+<span class="n">k</span> <span class="o">=</span> <span class="s2">&quot;Hello World!&quot;</span>
+<span class="n">k</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">Hello World!</span>
+<span class="s1">It</span><span class="se">\&#39;</span><span class="s1"> s hot today</span>
+<span class="s1">Let</span><span class="se">\&#39;</span><span class="s1">s party &#39;&#39;&#39;</span>
+</pre></div>
+
+
+<h2>函数与方法的区别</h2>
+<ul>
+<li>函数是模块中的方法, 通过名字直接调用</li>
+<li>方法与对象关联, 被对象调用</li>
+</ul>
+<h2>字符串常用函数和方法</h2>
+<div class="highlight"><pre><span></span><span class="c1"># 常用字符串方法和函数</span>
+<span class="nb">str</span><span class="p">()</span>
+<span class="nb">max</span><span class="p">()</span>
+<span class="nb">min</span><span class="p">()</span>
+<span class="nb">len</span><span class="p">()</span>
+<span class="nb">sorted</span><span class="p">()</span>
+<span class="nb">reversed</span><span class="p">()</span>
+<span class="n">capitalize</span><span class="p">()</span>
+<span class="n">lower</span><span class="p">()</span>
+<span class="n">upper</span><span class="p">()</span>
+<span class="n">swapcase</span><span class="p">()</span>
+<span class="n">title</span><span class="p">()</span>
+<span class="n">join</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span>
+<span class="n">ljust</span><span class="p">(</span><span class="n">width</span><span class="p">)</span>
+<span class="n">rjust</span><span class="p">(</span><span class="n">width</span><span class="p">)</span>
+<span class="n">center</span><span class="p">(</span><span class="n">width</span><span class="p">)</span>
+<span class="n">lstrip</span><span class="p">()</span>
+<span class="n">rstrip</span><span class="p">()</span>
+<span class="n">strip</span><span class="p">()</span>
+<span class="n">isalnum</span><span class="p">()</span>
+<span class="n">isalpha</span><span class="p">()</span>
+<span class="n">isdigit</span><span class="p">()</span>
+<span class="n">islower</span><span class="p">()</span>
+<span class="n">istitle</span><span class="p">()</span>
+<span class="n">isupper</span><span class="p">()</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">s</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Enter a string: &quot;</span><span class="p">)</span>
+<span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;The first character of&quot;</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="s2">&quot;is&quot;</span><span class="p">,</span> <span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;The entered string will appear character wise as:&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">n</span><span class="p">):</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;The entered string will appear character wise as:&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">s</span><span class="p">:</span>
+    <span class="k">print</span> <span class="p">(</span><span class="n">i</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;String with its characters sorted is&quot;</span><span class="p">,</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;String in reverse form is&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">s</span><span class="p">)))</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1"># 查找子字符串的方法</span>
+<span class="n">count</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="p">[</span><span class="n">start</span><span class="p">],</span> <span class="p">[</span><span class="n">end</span><span class="p">])</span> <span class="c1">#  查找 s 出现的次数</span>
+<span class="n">find</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="p">[</span><span class="n">start</span><span class="p">],</span> <span class="p">[</span><span class="n">end</span><span class="p">])</span> <span class="c1"># 查找 s 出现的第一个 index, 没有返回 -1</span>
+<span class="n">index</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="p">[</span><span class="n">start</span><span class="p">],</span> <span class="p">[</span><span class="n">end</span><span class="p">])</span> <span class="c1"># 查找 s 出现的第一个 index, 没有抛出错误</span>
+<span class="n">rfind</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="p">[</span><span class="n">start</span><span class="p">],</span> <span class="p">[</span><span class="n">end</span><span class="p">])</span> <span class="c1"># 查找 s 出现的最后一个 index, 没有返回 -1</span>
+<span class="n">rindex</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="p">[</span><span class="n">start</span><span class="p">],</span> <span class="p">[</span><span class="n">end</span><span class="p">])</span> <span class="c1"># 查找 s 出现的最后一个 index, 没有抛出错误</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1"># 匹配特定的字符串前缀或后缀</span>
+<span class="c1"># suffix 可以是一个 字符串 or 字符串构成的tuple</span>
+<span class="n">startswith</span><span class="p">(</span><span class="n">suffix</span><span class="p">,</span> <span class="p">[</span><span class="n">start</span><span class="p">],</span> <span class="p">[</span><span class="n">end</span><span class="p">])</span> <span class="c1"># 返回 True or False</span>
+<span class="n">endswith</span><span class="p">(</span><span class="n">suffix</span><span class="p">,</span> <span class="p">[</span><span class="n">start</span><span class="p">],</span> <span class="p">[</span><span class="n">end</span><span class="p">])</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="c1"># 切割字符串 or 替换字符串</span>
+<span class="n">partition</span><span class="p">(</span><span class="n">separator</span><span class="p">)</span>
+<span class="s1">&#39;aLb&#39;</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">&#39;L&#39;</span><span class="p">)</span> <span class="c1"># (&#39;a&#39;, &#39;L&#39;, &#39;b&#39;)</span>
+<span class="s1">&#39;aLb&#39;</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span> <span class="c1"># (&#39;aLb&#39;, &#39;&#39;, &#39;&#39;)</span>
+<span class="n">split</span><span class="p">(</span><span class="n">separator</span><span class="p">,[</span><span class="n">n</span><span class="p">])</span> <span class="c1"># n 表示切分几次</span>
+<span class="n">splitlines</span><span class="p">(</span><span class="n">boolean</span><span class="p">)</span>  <span class="c1"># 通过行分隔符切割字符串</span>
+<span class="n">expandtabs</span><span class="p">([</span><span class="n">tabsize</span><span class="p">])</span> <span class="c1"># 将 tab 展开为 空格</span>
+<span class="n">replace</span><span class="p">(</span><span class="n">sl</span><span class="p">,</span> <span class="n">s2</span><span class="p">,</span> <span class="p">[</span><span class="n">n</span><span class="p">])</span> <span class="c1"># 将 s1 替换为 s2 n 次, n 没有指定, 替换所有</span>
+</pre></div>
+
+
+<h1>数组</h1>
+<ul>
+<li>一维数组</li>
+<li>二维数组</li>
+</ul>
+<div class="highlight"><pre><span></span><span class="n">m1</span> <span class="o">=</span> <span class="p">[</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">]</span> <span class="p">]</span>
+<span class="n">m2</span> <span class="o">=</span> <span class="p">[</span> <span class="p">[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="p">]</span>
+<span class="n">m3</span> <span class="o">=</span> <span class="p">[</span> <span class="mi">2</span><span class="o">*</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="p">]</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;Addition of two matrices is&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+        <span class="n">m3</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">m1</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="n">m2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span>
+<span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">m3</span><span class="p">:</span>
+    <span class="k">print</span> <span class="p">(</span><span class="n">row</span><span class="p">)</span>
+</pre></div>
+
+
+<h1>List</h1>
+<div class="highlight"><pre><span></span><span class="n">months</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;January&#39;</span><span class="p">,</span> <span class="s1">&#39;February&#39;</span><span class="p">,</span> <span class="s1">&#39;March&#39;</span><span class="p">,</span> \
+          <span class="s1">&#39;April&#39;</span><span class="p">,</span> <span class="s1">&#39;May&#39;</span><span class="p">,</span> <span class="s1">&#39;June&#39;</span><span class="p">,</span> <span class="s1">&#39;July&#39;</span><span class="p">,</span> \
+          <span class="s1">&#39;August&#39;</span><span class="p">,</span> <span class="s1">&#39;September&#39;</span><span class="p">,</span> <span class="s1">&#39;October&#39;</span><span class="p">,</span> \
+          <span class="s1">&#39;November&#39;</span><span class="p">,</span> <span class="s1">&#39;December&#39;</span><span class="p">]</span>
+<span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">months</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+    <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
+<span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Enter a value between 1 and 12: &quot;</span><span class="p">))</span>
+<span class="k">if</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">n</span> <span class="o">&lt;=</span> <span class="mi">12</span><span class="p">:</span>
+    <span class="k">print</span> <span class="p">(</span><span class="s2">&quot;The month is&quot;</span><span class="p">,</span> <span class="n">months</span><span class="p">[</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="k">print</span> <span class="p">(</span><span class="s2">&quot;Value is out of the range&quot;</span><span class="p">)</span>
+</pre></div>
+
+
+<h2>切片操作(slicing)</h2>
+<div class="highlight"><pre><span></span><span class="c1"># 基本语法</span>
+<span class="nb">list</span><span class="p">[</span><span class="n">start_index</span><span class="p">:</span><span class="n">end_index</span><span class="p">]</span> <span class="c1"># 包含 start_index(默认0) , 不包含 end_index(默认至结束)</span>
+<span class="n">tmplist</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;John&#39;</span><span class="p">,</span> <span class="s1">&#39;Kelly&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;Caroline&#39;</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="s1">&#39;Steve&#39;</span><span class="p">,</span> <span class="s1">&#39;Katheline&#39;</span><span class="p">]</span>
+<span class="n">tmplist</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+<span class="n">tmplist</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+<span class="n">tmplist</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span>
+<span class="n">tmplist</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+<span class="n">tmplist</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span>
+<span class="n">tmplist</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span>
+<span class="n">tmplist</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span>
+<span class="n">tmplist</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span>
+<span class="n">tmplist</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">:]</span>
+</pre></div>
+
+
+<ul>
+<li><code>list</code> 相关方法</li>
+</ul>
+<div class="highlight"><pre><span></span><span class="n">append</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+<span class="n">insert</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="nb">object</span><span class="p">)</span> <span class="c1"># 将 object 插入 index 前, index 超出范围, 小于就在前追加, 大于就在后追加</span>
+<span class="n">pop</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="c1"># 默认 -1, 最后一个元素. 移除并返回. 对空 list 操作将抛出异常</span>
+<span class="k">del</span> <span class="nb">list</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="c1"># 删除 list 的 n</span>
+<span class="n">remove</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="c1"># 移除, 如果 value 不再 list 中, 将抛出异常</span>
+<span class="n">reverse</span><span class="p">()</span> <span class="c1"># 反转 list</span>
+<span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span> <span class="c1"># 将 list 的元素添加到原始 list 中</span>
+<span class="n">count</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="c1"># 统计 value 在 list 中出现的次数</span>
+<span class="n">index</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="c1"># 获取 value 在 list 中 index, 不存在将抛出异常</span>
+</pre></div>
+
+
+<h1>Tuple</h1>
+<ul>
+<li>不可变</li>
+<li>可存储任何数据类型</li>
+</ul>
+<div class="highlight"><pre><span></span><span class="n">names</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;John&#39;</span><span class="p">,</span> <span class="s1">&#39;Kelly&#39;</span><span class="p">,</span> <span class="s1">&#39;Caroline&#39;</span><span class="p">,</span> <span class="s1">&#39;Steve&#39;</span><span class="p">,</span> <span class="s1">&#39;Katheline&#39;</span><span class="p">)</span>
+<span class="n">n</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Enter the name to search: &quot;</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;The name&quot;</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="s2">&quot;is present in the tuple&quot;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;The name&quot;</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="s2">&quot;does not exist in the tuple&quot;</span><span class="p">)</span>
+<span class="n">countries</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;U.S.&#39;</span><span class="p">,</span> <span class="s1">&#39;U.K&#39;</span><span class="p">,</span> <span class="s1">&#39;India&#39;</span><span class="p">)</span>
+<span class="n">names</span> <span class="o">+=</span> <span class="n">countries</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;The tuples are concatenated. The concatenated tuple is&quot;</span><span class="p">,</span> <span class="n">names</span><span class="p">)</span>
+</pre></div>
+
+
+<h1>Dictionary</h1>
+<ul>
+<li>可变</li>
+</ul>
+<div class="highlight"><pre><span></span><span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="n">key1</span> <span class="p">:</span> <span class="n">value1</span><span class="p">,</span> <span class="n">key2</span> <span class="p">:</span> <span class="n">value2</span> <span class="p">}</span>
+</pre></div>
+
+
+<h2>常用方法和函数</h2>
+<div class="highlight"><pre><span></span><span class="n">clear</span><span class="p">()</span>
+<span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">[</span><span class="n">default</span><span class="p">])</span> <span class="c1"># key 对应的值不存在, 返回 default 指定的默认值</span>
+<span class="n">update</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="p">[</span><span class="n">key</span><span class="o">=</span><span class="n">value</span><span class="o">...</span><span class="p">])</span> <span class="c1"># 合并两个字典, 已存在的 key 更新</span>
+<span class="n">copy</span><span class="p">()</span>
+<span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">[</span><span class="n">default</span><span class="p">])</span> <span class="c1"># 如果 key 不存在, 默认值也没有提供, 就抛出一个异常</span>
+<span class="n">items</span><span class="p">()</span> <span class="c1"># 返回 tuple 组成的 序列 (key, value)</span>
+<span class="n">keys</span><span class="p">()</span> <span class="c1"># 返回 key 组成的 序列</span>
+<span class="n">values</span><span class="p">()</span> <span class="c1"># 返回 value 组成的 序列</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">student1</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;John&#39;</span> <span class="p">:</span> <span class="mi">60</span><span class="p">,</span> <span class="s1">&#39;Kelly&#39;</span> <span class="p">:</span> <span class="mi">70</span><span class="p">,</span> <span class="s1">&#39;Caroline&#39;</span> <span class="p">:</span> <span class="mi">80</span><span class="p">}</span>
+<span class="n">student2</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">([(</span><span class="s1">&#39;David&#39;</span><span class="p">,</span> <span class="mi">90</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;John&#39;</span><span class="p">,</span><span class="mi">55</span><span class="p">)])</span>
+<span class="k">print</span><span class="p">(</span><span class="s1">&#39;The items in dictionary student1 are:&#39;</span><span class="p">,</span> <span class="n">student1</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+<span class="k">print</span><span class="p">(</span><span class="s1">&#39;The keys in student1 dictionary are:&#39;</span><span class="p">,</span> <span class="n">student1</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+<span class="k">print</span><span class="p">(</span><span class="s1">&#39;The values in student1 dictionary are:&#39;</span><span class="p">,</span> <span class="n">student1</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+<span class="n">student1</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">student2</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s1">&#39;The items in dictionary student1 after merging with student2 dictionary are:&#39;</span><span class="p">,</span> <span class="n">student1</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+<span class="n">n</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s1">&#39;Enter name whose marks you want to see: &#39;</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">student1</span><span class="p">:</span> <span class="c1"># key</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;The marks of&#39;</span><span class="p">,</span> <span class="n">n</span> <span class="p">,</span> <span class="s1">&#39;are&#39;</span> <span class="p">,</span> <span class="n">student1</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Sorry the name&#39;</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="s1">&#39;does not exist in student1 dictionary&#39;</span><span class="p">)</span>
+</pre></div>
+
+
+<h1>Set</h1>
+<h2>并(|)</h2>
+<div class="highlight"><pre><span></span><span class="n">S1</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">11</span><span class="p">,</span><span class="mi">100</span><span class="p">])</span>
+<span class="n">S2</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">11</span><span class="p">,</span><span class="mi">15</span><span class="p">])</span>
+<span class="n">S1</span> <span class="o">|</span> <span class="n">S2</span> <span class="c1"># set([1,3,5,6,10,11,15,100])</span>
+</pre></div>
+
+
+<h2>交(&amp;)</h2>
+<div class="highlight"><pre><span></span><span class="n">S1</span> <span class="o">&amp;</span> <span class="n">S2</span> <span class="c1"># set([3, 5, 6, 11])</span>
+</pre></div>
+
+
+<h2>差(-)</h2>
+<div class="highlight"><pre><span></span><span class="n">S1</span> <span class="o">-</span> <span class="n">S2</span> <span class="c1"># set([10, 100])</span>
+</pre></div>
+
+
+<h2>集合的常用方法和函数</h2>
+<div class="highlight"><pre><span></span><span class="nb">len</span><span class="p">()</span>
+<span class="nb">max</span><span class="p">()</span>
+<span class="nb">min</span><span class="p">()</span>
+<span class="nb">sum</span><span class="p">()</span>
+<span class="nb">any</span><span class="p">()</span> <span class="c1"># 只要集合中有一个值为 True 就返回 True</span>
+<span class="nb">all</span><span class="p">()</span> <span class="c1"># 集合中所有的值都为 True 才返回 True</span>
+<span class="nb">sorted</span><span class="p">()</span> <span class="c1"># 将集合中元素排序后, 以 list 输出</span>
+<span class="n">clear</span><span class="p">()</span> 
+<span class="n">pop</span><span class="p">()</span> <span class="c1"># 移除集合中任意的一个元素, 如果集合为空, 将抛出异常</span>
+<span class="n">add</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+<span class="n">remove</span><span class="p">(</span><span class="n">item</span><span class="p">)</span><span class="o">/</span><span class="n">discard</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="c1"># 移除指定的元素, 如果不存在, 就抛出异常</span>
+<span class="n">update</span><span class="p">(</span><span class="nb">set</span><span class="p">)</span> <span class="c1"># 将指定的 set 合并到原集合中</span>
+</pre></div>
+</section>
+		</div>
+	</div> 	<!-- <hr> -->
+</div> <!-- /container -->
+<footer class="aw-footer bg-danger">
+	<div class="container"> <!-- footer -->
+		<div class="row">
+			<div class="col-md-10 col-md-offset-1">
+				<div class="row">
+					<div class="col-md-3">
+						<h4>Navigation</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="http://littlecaptain.net">Little Captain's Blog</a></li>
+							<li><a href="http://littlecaptain.net/pages/appde-tong-zhi-zhi-chi.html"><i class="fa fa-App的通知支持 "></i> App的通知支持</a></li>
+							<li><a href="http://littlecaptain.net/pages/block-zong-jie.html"><i class="fa fa-Block 总结 "></i> Block 总结</a></li>
+							<li><a href="http://littlecaptain.net/pages/building-c-applications.html"><i class="fa fa-Building C++ Applications "></i> Building C++ Applications</a></li>
+							<li><a href="http://littlecaptain.net/pages/gitshi-yong-jing-yan-ji-jin.html"><i class="fa fa-Git使用经验集锦 "></i> Git使用经验集锦</a></li>
+							<li><a href="http://littlecaptain.net/pages/gitji-ben-cao-zuo.html"><i class="fa fa-Git基本操作 "></i> Git基本操作</a></li>
+							<li><a href="http://littlecaptain.net/pages/javade-shu-ju-lei-xing.html"><i class="fa fa-Java的数据类型 "></i> Java的数据类型</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-1.html"><i class="fa fa-Lean Python(Chapter 1) "></i> Lean Python(Chapter 1)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-10.html"><i class="fa fa-Lean Python(Chapter 10) "></i> Lean Python(Chapter 10)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-11.html"><i class="fa fa-Lean Python(Chapter 11) "></i> Lean Python(Chapter 11)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-2.html"><i class="fa fa-Lean Python(Chapter 2) "></i> Lean Python(Chapter 2)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-3.html"><i class="fa fa-Lean Python(Chapter 3) "></i> Lean Python(Chapter 3)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-4.html"><i class="fa fa-Lean Python(Chapter 4) "></i> Lean Python(Chapter 4)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-5.html"><i class="fa fa-Lean Python(Chapter 5) "></i> Lean Python(Chapter 5)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-6.html"><i class="fa fa-Lean Python(Chapter 6) "></i> Lean Python(Chapter 6)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-7.html"><i class="fa fa-Lean Python(Chapter 7) "></i> Lean Python(Chapter 7)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-8.html"><i class="fa fa-Lean Python(Chapter 8) "></i> Lean Python(Chapter 8)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-9.html"><i class="fa fa-Lean Python(Chapter 9) "></i> Lean Python(Chapter 9)</a></li>
+							<li><a href="http://littlecaptain.net/pages/linuxren-wu-guan-li.html"><i class="fa fa-Linux任务管理 "></i> Linux任务管理</a></li>
+							<li><a href="http://littlecaptain.net/pages/nodejsgai-shu.html"><i class="fa fa-Node.js概述 "></i> Node.js概述</a></li>
+							<li><a href="http://littlecaptain.net/pages/objective-cdai-ma-gui-fan.html"><i class="fa fa-Objective-C代码规范 "></i> Objective-C代码规范</a></li>
+							<li><a href="http://littlecaptain.net/pages/phpkai-fa-appjie-kou.html"><i class="fa fa-PHP开发App接口 "></i> PHP开发App接口</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyinstallershi-yong-shou-ce.html"><i class="fa fa-PyInstaller使用手册 "></i> PyInstaller使用手册</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-color-dialog.html"><i class="fa fa-PyQT5 color dialog "></i> PyQT5 color dialog</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-input-dialog.html"><i class="fa fa-PyQT5 input dialog "></i> PyQT5 input dialog</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqtchapter-1.html"><i class="fa fa-PyQt(Chapter 1) "></i> PyQt(Chapter 1)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqtchapter-2.html"><i class="fa fa-PyQt(Chapter 2) "></i> PyQt(Chapter 2)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqtchapter-3.html"><i class="fa fa-PyQt(Chapter 3) "></i> PyQt(Chapter 3)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqtchapter-4.html"><i class="fa fa-PyQt(Chapter 4) "></i> PyQt(Chapter 4)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqtchapter-5.html"><i class="fa fa-PyQt(Chapter 5) "></i> PyQt(Chapter 5)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqtchapter-6.html"><i class="fa fa-PyQt(Chapter 6) "></i> PyQt(Chapter 6)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqtchapter-7.html"><i class="fa fa-PyQt(Chapter 7) "></i> PyQt(Chapter 7)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-directory-view.html"><i class="fa fa-PyQt5 Directory View "></i> PyQt5 Directory View</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-form-layout.html"><i class="fa fa-PyQt5 Form Layout "></i> PyQt5 Form Layout</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-matplotlib.html"><i class="fa fa-PyQt5 Matplotlib "></i> PyQt5 Matplotlib</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-qboxlayout.html"><i class="fa fa-PyQt5 QBoxLayout "></i> PyQt5 QBoxLayout</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-treeview.html"><i class="fa fa-PyQt5 Treeview "></i> PyQt5 Treeview</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-absolute-position.html"><i class="fa fa-PyQt5 absolute position "></i> PyQt5 absolute position</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-browser.html"><i class="fa fa-PyQt5 browser "></i> PyQt5 browser</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-buttons.html"><i class="fa fa-PyQt5 buttons "></i> PyQt5 buttons</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-colors.html"><i class="fa fa-PyQt5 colors "></i> PyQt5 colors</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-drag-and-drop.html"><i class="fa fa-PyQt5 drag and drop "></i> PyQt5 drag and drop</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-file-dialog.html"><i class="fa fa-PyQt5 file dialog "></i> PyQt5 file dialog</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-font-dialog.html"><i class="fa fa-PyQt5 font dialog "></i> PyQt5 font dialog</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-grid-layout.html"><i class="fa fa-PyQt5 grid layout "></i> PyQt5 grid layout</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-horizontal-layout.html"><i class="fa fa-PyQt5 horizontal layout "></i> PyQt5 horizontal layout</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-image.html"><i class="fa fa-PyQt5 image "></i> PyQt5 image</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-menu.html"><i class="fa fa-PyQt5 menu "></i> PyQt5 menu</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-messagebox.html"><i class="fa fa-PyQt5 messagebox "></i> PyQt5 messagebox</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-pixels.html"><i class="fa fa-PyQt5 pixels "></i> PyQt5 pixels</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-signals-and-slots.html"><i class="fa fa-PyQt5 signals and slots "></i> PyQt5 signals and slots</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-statusbar.html"><i class="fa fa-PyQt5 statusbar "></i> PyQt5 statusbar</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-table.html"><i class="fa fa-PyQt5 table "></i> PyQt5 table</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tabs.html"><i class="fa fa-PyQt5 tabs "></i> PyQt5 tabs</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-textbox.html"><i class="fa fa-PyQt5 textbox "></i> PyQt5 textbox</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialcustom-widgets.html"><i class="fa fa-PyQt5 tutorial(Custom widgets) "></i> PyQt5 tutorial(Custom widgets)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialdate-and-time.html"><i class="fa fa-PyQt5 tutorial(Date and time) "></i> PyQt5 tutorial(Date and time)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialdialogs.html"><i class="fa fa-PyQt5 tutorial(Dialogs) "></i> PyQt5 tutorial(Dialogs)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialdrag-drop.html"><i class="fa fa-PyQt5 tutorial(Drag & drop) "></i> PyQt5 tutorial(Drag & drop)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialevents-and-signals.html"><i class="fa fa-PyQt5 tutorial(Events and signals) "></i> PyQt5 tutorial(Events and signals)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialfirst-programs.html"><i class="fa fa-PyQt5 tutorial(First programs) "></i> PyQt5 tutorial(First programs)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialintroduction.html"><i class="fa fa-PyQt5 tutorial(Introduction) "></i> PyQt5 tutorial(Introduction)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutoriallayout-management.html"><i class="fa fa-PyQt5 tutorial(Layout management) "></i> PyQt5 tutorial(Layout management)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialmenus-and-toolbars.html"><i class="fa fa-PyQt5 tutorial(Menus and toolbars) "></i> PyQt5 tutorial(Menus and toolbars)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialpainting.html"><i class="fa fa-PyQt5 tutorial(Painting) "></i> PyQt5 tutorial(Painting)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialthe-tetris-game.html"><i class="fa fa-PyQt5 tutorial(The Tetris game) "></i> PyQt5 tutorial(The Tetris game)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialwidgets-ii.html"><i class="fa fa-PyQt5 tutorial(Widgets II) "></i> PyQt5 tutorial(Widgets II)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialwidgets.html"><i class="fa fa-PyQt5 tutorial(Widgets) "></i> PyQt5 tutorial(Widgets)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-window.html"><i class="fa fa-PyQt5 window "></i> PyQt5 window</a></li>
+							<li><a href="http://littlecaptain.net/pages/runloopjiu-zhe-yi-pian.html"><i class="fa fa-RunLoop就这一篇 "></i> RunLoop就这一篇</a></li>
+							<li><a href="http://littlecaptain.net/pages/svnji-ben-cao-zuo.html"><i class="fa fa-SVN基本操作 "></i> SVN基本操作</a></li>
+							<li><a href="http://littlecaptain.net/pages/uitableview-de-xing-neng-you-hua.html"><i class="fa fa-UITableView 的性能优化 "></i> UITableView 的性能优化</a></li>
+							<li><a href="http://littlecaptain.net/pages/xcodechang-jian-she-zhi-ji-jin.html"><i class="fa fa-Xcode常见设置集锦 "></i> Xcode常见设置集锦</a></li>
+							<li><a href="http://littlecaptain.net/pages/condade-ji-ben-shi-yong.html"><i class="fa fa-conda的基本使用 "></i> conda的基本使用</a></li>
+							<li><a href="http://littlecaptain.net/pages/gitchang-yong-ming-ling.html"><i class="fa fa-git常用命令 "></i> git常用命令</a></li>
+							<li><a href="http://littlecaptain.net/pages/hello-blog.html"><i class="fa fa-Hello Blog "></i> Hello Blog</a></li>
+							<li><a href="http://littlecaptain.net/pages/ioskai-fa-zhong-de-ge-chong-chi-cun.html"><i class="fa fa-iOS开发中的各种尺寸 "></i> iOS开发中的各种尺寸</a></li>
+							<li><a href="http://littlecaptain.net/pages/iosshu-ju-de-cun-chu-fang-shi.html"><i class="fa fa-iOS数据的存储方式 "></i> iOS数据的存储方式</a></li>
+							<li><a href="http://littlecaptain.net/pages/ioswen-jian-shang-chuan.html"><i class="fa fa-iOS文件上传 "></i> iOS文件上传</a></li>
+							<li><a href="http://littlecaptain.net/pages/ioswen-jian-xia-zai.html"><i class="fa fa-iOS文件下载 "></i> iOS文件下载</a></li>
+							<li><a href="http://littlecaptain.net/pages/iosjian-ce-wang-luo-zhuang-tai.html"><i class="fa fa-iOS监测网络状态 "></i> iOS监测网络状态</a></li>
+							<li><a href="http://littlecaptain.net/pages/ioswang-luo-http.html"><i class="fa fa-iOS网络-HTTP "></i> iOS网络-HTTP</a></li>
+							<li><a href="http://littlecaptain.net/pages/ioswang-luo-nsurlconnection.html"><i class="fa fa-iOS网络-NSURLConnection "></i> iOS网络-NSURLConnection</a></li>
+							<li><a href="http://littlecaptain.net/pages/ioswang-luo-nsurlsession.html"><i class="fa fa-iOS网络-NSURLSession "></i> iOS网络-NSURLSession</a></li>
+							<li><a href="http://littlecaptain.net/pages/ioswang-luo-ji-chu.html"><i class="fa fa-iOS网络-基础 "></i> iOS网络-基础</a></li>
+							<li><a href="http://littlecaptain.net/pages/iosjie-ya-suo.html"><i class="fa fa-iOS解压缩 "></i> iOS解压缩</a></li>
+							<li><a href="http://littlecaptain.net/pages/ipa-bao-zhong-de-png-wen-jian-de-zheng-chang-hua.html"><i class="fa fa-ipa 包中的 PNG 文件的正常化 "></i> ipa 包中的 PNG 文件的正常化</a></li>
+							<li><a href="http://littlecaptain.net/pages/nullablenonnull.html"><i class="fa fa-nullable&nonnull "></i> nullable&nonnull</a></li>
+							<li><a href="http://littlecaptain.net/pages/shellkong-zhi-yu-ju.html"><i class="fa fa-shell控制语句 "></i> shell控制语句</a></li>
+							<li><a href="http://littlecaptain.net/pages/shellshu-xue-yun-suan.html"><i class="fa fa-shell数学运算 "></i> shell数学运算</a></li>
+							<li><a href="http://littlecaptain.net/pages/shelljiao-ben-bian-cheng-ji-chu.html"><i class="fa fa-shell脚本编程基础 "></i> shell脚本编程基础</a></li>
+							<li><a href="http://littlecaptain.net/pages/yi-kuan-ji-yu-afnetworkingfeng-zhuang-de-wang-luo-kuang-jia.html"><i class="fa fa-一款基于AFNetworking封装的网络框架 "></i> 一款基于AFNetworking封装的网络框架</a></li>
+							<li><a href="http://littlecaptain.net/pages/fen-bu-shi-git-gong-zuo-liu-cheng.html"><i class="fa fa-分布式Git - 工作流程 "></i> 分布式Git - 工作流程</a></li>
+							<li><a href="http://littlecaptain.net/pages/fa-bu-kuang-jia-dao-cocoapodsshang.html"><i class="fa fa-发布框架到CocoaPods上 "></i> 发布框架到CocoaPods上</a></li>
+							<li><a href="http://littlecaptain.net/pages/ming-ling-ti-shi-fu-de-ge-shi.html"><i class="fa fa-命令提示符的格式 "></i> 命令提示符的格式</a></li>
+							<li><a href="http://littlecaptain.net/pages/zai-windowsping-tai-da-jian-gogsfu-wu.html"><i class="fa fa-在Windows平台搭建gogs服务 "></i> 在Windows平台搭建gogs服务</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-gcdzong-jie.html"><i class="fa fa-多线程-GCD总结 "></i> 多线程-GCD总结</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-nsoperationzong-jie.html"><i class="fa fa-多线程-NSOperation总结 "></i> 多线程-NSOperation总结</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-nsthreadde-shi-yong.html"><i class="fa fa-多线程-NSThread的使用 "></i> 多线程-NSThread的使用</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-ioszhong-de-zhu-xian-cheng.html"><i class="fa fa-多线程-iOS中的主线程 "></i> 多线程-iOS中的主线程</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-ioszhong-de-shi-xian-fang-an.html"><i class="fa fa-多线程-iOS中的实现方案 "></i> 多线程-iOS中的实现方案</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-ji-ben-gai-nian-he-yuan-li.html"><i class="fa fa-多线程-基本概念和原理 "></i> 多线程-基本概念和原理</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-an-quan-yin-huan.html"><i class="fa fa-多线程-安全隐患 "></i> 多线程-安全隐患</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-xian-cheng-jian-tong-xin.html"><i class="fa fa-多线程-线程间通信 "></i> 多线程-线程间通信</a></li>
+							<li><a href="http://littlecaptain.net/pages/da-jian-gitfu-wu-qi.html"><i class="fa fa-搭建git服务器 "></i> 搭建git服务器</a></li>
+							<li><a href="http://littlecaptain.net/pages/ben-di-tui-song-tong-zhi.html"><i class="fa fa-本地推送通知 "></i> 本地推送通知</a></li>
+							<li><a href="http://littlecaptain.net/pages/zheng-ze-biao-da-shi-ji-chu.html"><i class="fa fa-正则表达式基础 "></i> 正则表达式基础</a></li>
+							<li><a href="http://littlecaptain.net/pages/huan-xin-ni-cheng-he-tou-xiang-de-chu-li.html"><i class="fa fa-环信昵称和头像的处理 "></i> 环信昵称和头像的处理</a></li>
+							<li><a href="http://littlecaptain.net/pages/wang-luo-ji-ben-gai-nian.html"><i class="fa fa-网络基本概念 "></i> 网络基本概念</a></li>
+							<li><a href="http://littlecaptain.net/pages/wang-luo-mo-xing.html"><i class="fa fa-网络模型 "></i> 网络模型</a></li>
+							<li><a href="http://littlecaptain.net/pages/liao-liao-ios-de-mvc-jia-gou.html"><i class="fa fa-聊聊 iOS 的 MVC 架构 "></i> 聊聊 iOS 的 MVC 架构</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Author</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="#">You can add links in your config file</a></li>
+							<li><a href="#">Another social link</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Categories</h4>
+						<ul class="list-unstyled my-list-style">
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Links</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="http://getpelican.com/">Pelican</a></li>
+							<li><a href="http://python.org/">Python.org</a></li>
+							<li><a href="http://jinja.pocoo.org/">Jinja2</a></li>
+							<li><a href="#">You can modify those links in your config file</a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</footer>
+<div class="container">
+	<div class="row">
+		<div class="col-md-12 text-center center-block aw-bottom">
+			<p>&copy; Little Captain 2016</p>
+			<p>Powered by Pelican</p>
+		</div>
+	</div>
+</div>
+<!-- JavaScript -->
+<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+	$("div.collapseheader").click(function () {
+		$header = $(this).children("span").first();
+		$codearea = $(this).children(".input_area");
+		$codearea.slideToggle(500, function () {
+			$header.text(function () {
+				return $codearea.is(":visible") ? "Collapse Code" : "Expand Code";
+			});
+		});
+	});
+});
+</script>
+</body>
+</html>

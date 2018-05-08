@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+	<meta charset="utf-8">
+	<title>搭建git服务器 — Little Captain's Blog </title>
+	<meta name="description" content="">
+	<meta name="author" content="Little Captain">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+	<!--[if lt IE 9]>
+		<script src="http://littlecaptain.net/theme/html5.js"></script>
+		<![endif]-->
+	<link href="http://littlecaptain.net/theme/css/ipython.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/bootswatch/3.2.0/simplex/bootstrap.min.css" rel="stylesheet">
+	<link href="http://littlecaptain.net/theme/css/local.css" rel="stylesheet">
+	<link href="http://littlecaptain.net/theme/css/pygments.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+	<div class="page-header">
+		<h1><a href="http://littlecaptain.net/">Little Captain's Blog</a>
+			<br>	</div>
+	<div class="row">
+		<div class="col-md-8 col-md-offset-2">
+        
+<section id="content" class="body">    
+    <ul>
+<li>git</li>
+<li>源代码管理</li>
+</ul>
+<hr>
+<h2>准备篇</h2>
+<h3>服务器</h3>
+<ul>
+<li>创建git专用账户git</li>
+</ul>
+<div class="highlight"><pre><span></span>sudo adduser --system --shell /bin/bash --user-group git <span class="c1"># CentOS</span>
+sudo adduser git ssh
+sudo passwd git  
+</pre></div>
+
+
+<!--more-->
+
+<ul>
+<li>修改git账户的home目录(有需求才改)</li>
+</ul>
+<div class="highlight"><pre><span></span><span class="c1"># 当然可以直接修改/etc/passwd文件</span>
+usermod -d /tmp git
+</pre></div>
+
+
+<ul>
+<li>安装相关软件(在任何账户都可)</li>
+</ul>
+<div class="highlight"><pre><span></span>sudo apt-get update
+sudo apt-get install git-core openssh-server openssh-client
+sudo apt-get install python-setuptools
+</pre></div>
+
+
+<ul>
+<li>
+<p>进入<code>git账户</code>, 安装gitosis</p>
+</li>
+<li>
+<p>1.获取</p>
+</li>
+</ul>
+<div class="highlight"><pre><span></span>git clone https://github.com/res0nat0r/gitosis.git
+</pre></div>
+
+
+<ul>
+<li>2.进入gitosis目录安装gitosis</li>
+</ul>
+<div class="highlight"><pre><span></span>sudo python setup.py install
+</pre></div>
+
+
+<blockquote>
+<p>安装完gitosis, 并没有任何仓库, 我们还要用管理员的SSH key公钥来初始化gitosis</p>
+</blockquote>
+<h3>管理员主机</h3>
+<ul>
+<li>生成 SSH key</li>
+</ul>
+<div class="highlight"><pre><span></span><span class="c1"># -P后面的代表密码, &#39;&#39;表示无密码</span>
+<span class="c1"># 在生成时, 为新的key指定路径和名称, 不要覆盖.ssh目录下已有的key</span>
+ssh-keygen -t rsa -P <span class="s1">&#39;&#39;</span>
+</pre></div>
+
+
+<ul>
+<li>将刚刚生成的SSH key加入ssh-agent, 这一步一定不要忘记了, 如果忘记以后使用git和服务器通信时, 都会提示输入服务器密码, 而不会使用SSH key验证</li>
+</ul>
+<div class="highlight"><pre><span></span>ssh-add ~/.ssh/gitHost
+</pre></div>
+
+
+<ul>
+<li>将SSH key复制到服务器(只要能把公钥复制到服务器都可)</li>
+</ul>
+<div class="highlight"><pre><span></span>scp .ssh/gitHost.pub git@192.168.11.116:~/gitHost.pub
+</pre></div>
+
+
+<h2>服务器上安装gitosis(git账户下)</h2>
+<ul>
+<li>使用本地主机上传的公钥来对gitosis初始化</li>
+</ul>
+<div class="highlight"><pre><span></span>sudo -H -u git gitosis-init &lt; .ssh/gitHost.pub
+</pre></div>
+
+
+<blockquote>
+<p>初始化完成后, 会在gitosis会将gitHost.pub的内容复制到<code>.ssh/authorized_keys</code>中, 所以可以使用管理员主机进行管理了</p>
+</blockquote>
+<ul>
+<li>修改目录权限, 不然, 在本地主机clone的项目读写权限不够</li>
+</ul>
+<div class="highlight"><pre><span></span>sudo chmod <span class="m">755</span> /home/git/repositories/gitosis-admin.git/hooks/post-update
+</pre></div>
+
+
+<blockquote>
+<p>初始化完后, 默认的仓库在<code>~/repositories</code>目录下, <code>gitosis-admin.git</code>仓库就是我们管理仓库的专用仓库.</p>
+</blockquote>
+<h2>管理员配置仓库<span id='3'></span></h2>
+<ul>
+<li>在管理员主机上clone gitosis-admin.git</li>
+</ul>
+<div class="highlight"><pre><span></span>git clone git@server:gitosis-admin.git 
+</pre></div>
+
+
+<blockquote>
+<p>clone下来会有一个gitosis.conf的配置文件和一个keydir的目录。gitosis.conf用于配置用户的权限信息，keydir主要用户存放ssh公钥文件（一般以“用户名.pub”命名，gitosis.conf配置文件中需使用相同用户名），用于认证请求的客户端机器。</p>
+</blockquote>
+<ul>
+<li>修改配置文件gitosis.conf, 配置好后推送到服务器才算配置成功, 新增的用户不能立即生效, 服务器端需要重启sshd服务<code>sudo service sshd restart</code></li>
+</ul>
+<p><em>gitosis.conf格式如下</em></p>
+<div class="highlight"><pre><span></span><span class="o">[</span>gitosis<span class="o">]</span>
+
+<span class="o">[</span>group gitosis-admin<span class="o">]</span> <span class="c1">#管理员组</span>
+<span class="nv">members</span> <span class="o">=</span> charn@ubuntu <span class="c1">#管理员用户名，需要在keydir目录下找到相应的.pub文件，多个可用空格隔开（下同）</span>
+<span class="nv">writable</span> <span class="o">=</span> gitosis-admin <span class="c1">#可写的项目仓库名，多个可用空格隔开（下同）</span>
+
+<span class="o">[</span>group testwrite<span class="o">]</span> <span class="c1">#可写权限组</span>
+<span class="nv">members</span> <span class="o">=</span> zhangsan <span class="c1">#组用户</span>
+<span class="nv">writable</span> <span class="o">=</span> mytestproject <span class="c1">#可写的项目仓库名</span>
+
+<span class="o">[</span>group testread<span class="o">]</span> <span class="c1">#只读权限组</span>
+<span class="nv">members</span> <span class="o">=</span>lisi <span class="c1">#组用户</span>
+<span class="nv">readonly</span><span class="o">=</span> mytestproject <span class="c1">#只读项目仓库名</span>
+</pre></div>
+
+
+<h2>管理员新建仓库</h2>
+<ul>
+<li>1.配置管理员仓库的gitosis.conf文件</li>
+</ul>
+<div class="highlight"><pre><span></span><span class="o">[</span>group groupName<span class="o">]</span> <span class="c1"># 组</span>
+<span class="nv">members</span> <span class="o">=</span> memberName <span class="c1"># 用户</span>
+<span class="nv">writable</span> <span class="o">=</span> projectName <span class="c1"># 项目名</span>
+</pre></div>
+
+
+<ul>
+<li>2.增加相应的memberName.pub到keydir文件夹</li>
+<li>3.将更新推送到服务器</li>
+<li>4.重启服务器的sshd服务</li>
+</ul>
+<div class="highlight"><pre><span></span>sudo service sshd restart
+</pre></div>
+
+
+<ul>
+<li>5.在本地新建仓库, 并推送到服务器</li>
+</ul>
+<div class="highlight"><pre><span></span><span class="c1"># 新建项目文件夹</span>
+mkdir projectName
+<span class="c1"># 进入</span>
+<span class="nb">cd</span> projectName
+<span class="c1"># git初始化</span>
+git init
+<span class="c1"># 加入一些必要文件比如.gitignore和项目文件夹</span>
+git add .
+<span class="c1"># 提交</span>
+git commit -m <span class="s1">&#39;initialize project&#39;</span>
+<span class="c1"># 添加远程仓库地址</span>
+git remote add origin git@192.168.11.116:projectName.git
+<span class="c1"># 设置上游仓库, 并推送上去</span>
+git push -u origin master:master
+</pre></div>
+
+
+<blockquote>
+<p>经过以上步骤, 服务器上的仓库就建立完毕了, 这时就可以在其他客户机上clone仓库了</p>
+</blockquote>
+<ul>
+<li>6.测试仓库是否建立成功</li>
+</ul>
+<div class="highlight"><pre><span></span><span class="nb">cd</span> ..
+<span class="c1"># 删除项目文件夹</span>
+rm -rf projectName
+<span class="c1"># 再次克隆远程仓库</span>
+git clone git@192.168.11.116:projectName.git
+<span class="c1"># 进入工程文件件</span>
+<span class="nb">cd</span> projectName
+<span class="c1"># 查看分支信息</span>
+git branch -a
+<span class="c1"># 显示结果如下, 表示仓库建立成功</span>
+* master
+  remotes/origin/HEAD -&gt; origin/master
+  remotes/origin/master
+</pre></div>
+
+
+<h2>使用GitWeb</h2>
+<blockquote>
+<p>在本地, 如果你对项目有读写权限或只读权限，你可能需要建立起一个基于网页的简易查看器。 Git 提供了一个叫做 Git Web 的 CGI 脚本来做这项工作。</p>
+</blockquote>
+<p><em>Mac上</em></p>
+<div class="highlight"><pre><span></span><span class="c1"># 启动一个监听 1234 端口的 HTTP 服务器，并且自动打开了浏览器</span>
+git instaweb --httpd<span class="o">=</span>webrick
+<span class="c1"># 完成了工作, 关闭这个服务器</span>
+git instaweb --httpd<span class="o">=</span>webrick --stop
+</pre></div>
+
+
+<ul>
+<li>服务器上新建项目仓库. 新建的这个仓库暂时还是空的，不能被客户端clone，还需要对gitosis进行一些配置操作. <a href="#3">参见</a></li>
+</ul>
+<h2>坑</h2>
+<p><em>git is not in the sudoers file. This incident will be reported的解决方法</em></p>
+<div class="highlight"><pre><span></span><span class="c1"># 方法1, 修改git ALL=(ALL) ALL</span>
+vim /etc/sudoers
+<span class="c1"># 方法2</span>
+sudo su
+<span class="nb">echo</span> <span class="s1">&#39;git ALL=(ALL) ALL&#39;</span> &gt;&gt; /etc/sudoers
+</pre></div>
+
+
+<h3>建立客户机与服务器SSH无密码登录</h3>
+<ul>
+<li>将本地上传的gitHost.pub手动添加到.ssh/authorzied_keys文件里</li>
+</ul>
+<div class="highlight"><pre><span></span>cat gitHost.pub &gt;&gt; .ssh/authorized_keys
+// authorized_keys的权限要是600
+chmod <span class="m">600</span> .ssh/authorized_keys
+</pre></div>
+
+
+<p><em>经过以上所有的步骤, 已经可以通过SSH key在本地主机无秘密链接服务器了</em></p>
+<div class="highlight"><pre><span></span>ssh git@192.168.11.116
+</pre></div>
+
+
+<p><em>在.ssh文件夹中配置config文件</em></p>
+<div class="highlight"><pre><span></span>* config文件
+host gitHost
+user git
+hostname <span class="m">192</span>.168.11.116
+port <span class="m">22</span>
+identityfile ~/.ssh/gitHost
+</pre></div>
+
+
+<p><em>这时可以使用简写形式</em></p>
+<div class="highlight"><pre><span></span>ssh gitHost
+</pre></div>
+
+
+<ul>
+<li>修改服务器的/etc/passwd文件, 禁止用户通过shell登陆</li>
+</ul>
+<div class="highlight"><pre><span></span># 原本
+git:x:122:130::/home/git:/bin/bash
+# 修改后
+git:x:122:130:,,,:/home/git:/bin/bash
+</pre></div>
+
+
+<ul>
+<li>在使用 <code>ssh git@192.168.11.116</code>链接服务器如果提示<code>REMOTE HOST IDENTIFICATION HAS CHANGED</code>, 进入<code>~/.ssh/known_hosts</code>将<code>192.168.11.116</code>相关的rsa都删除</li>
+<li>SSH免密码登录补充</li>
+</ul>
+<p><em>修改SSH配置文件</em></p>
+<div class="highlight"><pre><span></span>sudo vim /etc/ssh/sshd_config
+</pre></div>
+
+
+<p><em>修改后</em></p>
+<p><img alt="" src="/assets/images/git/git常用命令-12.png"></p>
+<blockquote>
+<p>注意: 建立这种登录关系, 如果没有必要不要操作, 因为前面已经建立了git账户的SSH链接, 如果这个也建立, 会出现一些奇怪的现象, 比如在使用git克隆仓库时, 必须使用仓库在服务器上的全路径才能克隆. 其实核心的操作就是不要将客户机的公钥手动追加到authorized_keys中, 如果git链接不成功, 或者链接后还要输服务器密码, 那么这里的其他配置, 是可以用来配置git的SSH链接的</p>
+</blockquote>
+<div class="highlight"><pre><span></span><span class="c1"># 使用全路径才能clone仓库</span>
+git clone git@192.168.11.116:~/repositories/gitosis-admin.git
+</pre></div>
+</section>
+		</div>
+	</div> 	<!-- <hr> -->
+</div> <!-- /container -->
+<footer class="aw-footer bg-danger">
+	<div class="container"> <!-- footer -->
+		<div class="row">
+			<div class="col-md-10 col-md-offset-1">
+				<div class="row">
+					<div class="col-md-3">
+						<h4>Navigation</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="http://littlecaptain.net">Little Captain's Blog</a></li>
+							<li><a href="http://littlecaptain.net/pages/appde-tong-zhi-zhi-chi.html"><i class="fa fa-App的通知支持 "></i> App的通知支持</a></li>
+							<li><a href="http://littlecaptain.net/pages/block-zong-jie.html"><i class="fa fa-Block 总结 "></i> Block 总结</a></li>
+							<li><a href="http://littlecaptain.net/pages/building-c-applications.html"><i class="fa fa-Building C++ Applications "></i> Building C++ Applications</a></li>
+							<li><a href="http://littlecaptain.net/pages/gitshi-yong-jing-yan-ji-jin.html"><i class="fa fa-Git使用经验集锦 "></i> Git使用经验集锦</a></li>
+							<li><a href="http://littlecaptain.net/pages/gitji-ben-cao-zuo.html"><i class="fa fa-Git基本操作 "></i> Git基本操作</a></li>
+							<li><a href="http://littlecaptain.net/pages/javade-shu-ju-lei-xing.html"><i class="fa fa-Java的数据类型 "></i> Java的数据类型</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-1.html"><i class="fa fa-Lean Python(Chapter 1) "></i> Lean Python(Chapter 1)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-10.html"><i class="fa fa-Lean Python(Chapter 10) "></i> Lean Python(Chapter 10)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-11.html"><i class="fa fa-Lean Python(Chapter 11) "></i> Lean Python(Chapter 11)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-2.html"><i class="fa fa-Lean Python(Chapter 2) "></i> Lean Python(Chapter 2)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-3.html"><i class="fa fa-Lean Python(Chapter 3) "></i> Lean Python(Chapter 3)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-4.html"><i class="fa fa-Lean Python(Chapter 4) "></i> Lean Python(Chapter 4)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-5.html"><i class="fa fa-Lean Python(Chapter 5) "></i> Lean Python(Chapter 5)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-6.html"><i class="fa fa-Lean Python(Chapter 6) "></i> Lean Python(Chapter 6)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-7.html"><i class="fa fa-Lean Python(Chapter 7) "></i> Lean Python(Chapter 7)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-8.html"><i class="fa fa-Lean Python(Chapter 8) "></i> Lean Python(Chapter 8)</a></li>
+							<li><a href="http://littlecaptain.net/pages/lean-pythonchapter-9.html"><i class="fa fa-Lean Python(Chapter 9) "></i> Lean Python(Chapter 9)</a></li>
+							<li><a href="http://littlecaptain.net/pages/linuxren-wu-guan-li.html"><i class="fa fa-Linux任务管理 "></i> Linux任务管理</a></li>
+							<li><a href="http://littlecaptain.net/pages/nodejsgai-shu.html"><i class="fa fa-Node.js概述 "></i> Node.js概述</a></li>
+							<li><a href="http://littlecaptain.net/pages/objective-cdai-ma-gui-fan.html"><i class="fa fa-Objective-C代码规范 "></i> Objective-C代码规范</a></li>
+							<li><a href="http://littlecaptain.net/pages/phpkai-fa-appjie-kou.html"><i class="fa fa-PHP开发App接口 "></i> PHP开发App接口</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyinstallershi-yong-shou-ce.html"><i class="fa fa-PyInstaller使用手册 "></i> PyInstaller使用手册</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-color-dialog.html"><i class="fa fa-PyQT5 color dialog "></i> PyQT5 color dialog</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-input-dialog.html"><i class="fa fa-PyQT5 input dialog "></i> PyQT5 input dialog</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqtchapter-1.html"><i class="fa fa-PyQt(Chapter 1) "></i> PyQt(Chapter 1)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqtchapter-2.html"><i class="fa fa-PyQt(Chapter 2) "></i> PyQt(Chapter 2)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqtchapter-3.html"><i class="fa fa-PyQt(Chapter 3) "></i> PyQt(Chapter 3)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqtchapter-4.html"><i class="fa fa-PyQt(Chapter 4) "></i> PyQt(Chapter 4)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqtchapter-5.html"><i class="fa fa-PyQt(Chapter 5) "></i> PyQt(Chapter 5)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqtchapter-6.html"><i class="fa fa-PyQt(Chapter 6) "></i> PyQt(Chapter 6)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqtchapter-7.html"><i class="fa fa-PyQt(Chapter 7) "></i> PyQt(Chapter 7)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-directory-view.html"><i class="fa fa-PyQt5 Directory View "></i> PyQt5 Directory View</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-form-layout.html"><i class="fa fa-PyQt5 Form Layout "></i> PyQt5 Form Layout</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-matplotlib.html"><i class="fa fa-PyQt5 Matplotlib "></i> PyQt5 Matplotlib</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-qboxlayout.html"><i class="fa fa-PyQt5 QBoxLayout "></i> PyQt5 QBoxLayout</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-treeview.html"><i class="fa fa-PyQt5 Treeview "></i> PyQt5 Treeview</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-absolute-position.html"><i class="fa fa-PyQt5 absolute position "></i> PyQt5 absolute position</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-browser.html"><i class="fa fa-PyQt5 browser "></i> PyQt5 browser</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-buttons.html"><i class="fa fa-PyQt5 buttons "></i> PyQt5 buttons</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-colors.html"><i class="fa fa-PyQt5 colors "></i> PyQt5 colors</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-drag-and-drop.html"><i class="fa fa-PyQt5 drag and drop "></i> PyQt5 drag and drop</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-file-dialog.html"><i class="fa fa-PyQt5 file dialog "></i> PyQt5 file dialog</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-font-dialog.html"><i class="fa fa-PyQt5 font dialog "></i> PyQt5 font dialog</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-grid-layout.html"><i class="fa fa-PyQt5 grid layout "></i> PyQt5 grid layout</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-horizontal-layout.html"><i class="fa fa-PyQt5 horizontal layout "></i> PyQt5 horizontal layout</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-image.html"><i class="fa fa-PyQt5 image "></i> PyQt5 image</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-menu.html"><i class="fa fa-PyQt5 menu "></i> PyQt5 menu</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-messagebox.html"><i class="fa fa-PyQt5 messagebox "></i> PyQt5 messagebox</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-pixels.html"><i class="fa fa-PyQt5 pixels "></i> PyQt5 pixels</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-signals-and-slots.html"><i class="fa fa-PyQt5 signals and slots "></i> PyQt5 signals and slots</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-statusbar.html"><i class="fa fa-PyQt5 statusbar "></i> PyQt5 statusbar</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-table.html"><i class="fa fa-PyQt5 table "></i> PyQt5 table</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tabs.html"><i class="fa fa-PyQt5 tabs "></i> PyQt5 tabs</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-textbox.html"><i class="fa fa-PyQt5 textbox "></i> PyQt5 textbox</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialcustom-widgets.html"><i class="fa fa-PyQt5 tutorial(Custom widgets) "></i> PyQt5 tutorial(Custom widgets)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialdate-and-time.html"><i class="fa fa-PyQt5 tutorial(Date and time) "></i> PyQt5 tutorial(Date and time)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialdialogs.html"><i class="fa fa-PyQt5 tutorial(Dialogs) "></i> PyQt5 tutorial(Dialogs)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialdrag-drop.html"><i class="fa fa-PyQt5 tutorial(Drag & drop) "></i> PyQt5 tutorial(Drag & drop)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialevents-and-signals.html"><i class="fa fa-PyQt5 tutorial(Events and signals) "></i> PyQt5 tutorial(Events and signals)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialfirst-programs.html"><i class="fa fa-PyQt5 tutorial(First programs) "></i> PyQt5 tutorial(First programs)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialintroduction.html"><i class="fa fa-PyQt5 tutorial(Introduction) "></i> PyQt5 tutorial(Introduction)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutoriallayout-management.html"><i class="fa fa-PyQt5 tutorial(Layout management) "></i> PyQt5 tutorial(Layout management)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialmenus-and-toolbars.html"><i class="fa fa-PyQt5 tutorial(Menus and toolbars) "></i> PyQt5 tutorial(Menus and toolbars)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialpainting.html"><i class="fa fa-PyQt5 tutorial(Painting) "></i> PyQt5 tutorial(Painting)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialthe-tetris-game.html"><i class="fa fa-PyQt5 tutorial(The Tetris game) "></i> PyQt5 tutorial(The Tetris game)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialwidgets-ii.html"><i class="fa fa-PyQt5 tutorial(Widgets II) "></i> PyQt5 tutorial(Widgets II)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-tutorialwidgets.html"><i class="fa fa-PyQt5 tutorial(Widgets) "></i> PyQt5 tutorial(Widgets)</a></li>
+							<li><a href="http://littlecaptain.net/pages/pyqt5-window.html"><i class="fa fa-PyQt5 window "></i> PyQt5 window</a></li>
+							<li><a href="http://littlecaptain.net/pages/runloopjiu-zhe-yi-pian.html"><i class="fa fa-RunLoop就这一篇 "></i> RunLoop就这一篇</a></li>
+							<li><a href="http://littlecaptain.net/pages/svnji-ben-cao-zuo.html"><i class="fa fa-SVN基本操作 "></i> SVN基本操作</a></li>
+							<li><a href="http://littlecaptain.net/pages/uitableview-de-xing-neng-you-hua.html"><i class="fa fa-UITableView 的性能优化 "></i> UITableView 的性能优化</a></li>
+							<li><a href="http://littlecaptain.net/pages/xcodechang-jian-she-zhi-ji-jin.html"><i class="fa fa-Xcode常见设置集锦 "></i> Xcode常见设置集锦</a></li>
+							<li><a href="http://littlecaptain.net/pages/condade-ji-ben-shi-yong.html"><i class="fa fa-conda的基本使用 "></i> conda的基本使用</a></li>
+							<li><a href="http://littlecaptain.net/pages/gitchang-yong-ming-ling.html"><i class="fa fa-git常用命令 "></i> git常用命令</a></li>
+							<li><a href="http://littlecaptain.net/pages/hello-blog.html"><i class="fa fa-Hello Blog "></i> Hello Blog</a></li>
+							<li><a href="http://littlecaptain.net/pages/ioskai-fa-zhong-de-ge-chong-chi-cun.html"><i class="fa fa-iOS开发中的各种尺寸 "></i> iOS开发中的各种尺寸</a></li>
+							<li><a href="http://littlecaptain.net/pages/iosshu-ju-de-cun-chu-fang-shi.html"><i class="fa fa-iOS数据的存储方式 "></i> iOS数据的存储方式</a></li>
+							<li><a href="http://littlecaptain.net/pages/ioswen-jian-shang-chuan.html"><i class="fa fa-iOS文件上传 "></i> iOS文件上传</a></li>
+							<li><a href="http://littlecaptain.net/pages/ioswen-jian-xia-zai.html"><i class="fa fa-iOS文件下载 "></i> iOS文件下载</a></li>
+							<li><a href="http://littlecaptain.net/pages/iosjian-ce-wang-luo-zhuang-tai.html"><i class="fa fa-iOS监测网络状态 "></i> iOS监测网络状态</a></li>
+							<li><a href="http://littlecaptain.net/pages/ioswang-luo-http.html"><i class="fa fa-iOS网络-HTTP "></i> iOS网络-HTTP</a></li>
+							<li><a href="http://littlecaptain.net/pages/ioswang-luo-nsurlconnection.html"><i class="fa fa-iOS网络-NSURLConnection "></i> iOS网络-NSURLConnection</a></li>
+							<li><a href="http://littlecaptain.net/pages/ioswang-luo-nsurlsession.html"><i class="fa fa-iOS网络-NSURLSession "></i> iOS网络-NSURLSession</a></li>
+							<li><a href="http://littlecaptain.net/pages/ioswang-luo-ji-chu.html"><i class="fa fa-iOS网络-基础 "></i> iOS网络-基础</a></li>
+							<li><a href="http://littlecaptain.net/pages/iosjie-ya-suo.html"><i class="fa fa-iOS解压缩 "></i> iOS解压缩</a></li>
+							<li><a href="http://littlecaptain.net/pages/ipa-bao-zhong-de-png-wen-jian-de-zheng-chang-hua.html"><i class="fa fa-ipa 包中的 PNG 文件的正常化 "></i> ipa 包中的 PNG 文件的正常化</a></li>
+							<li><a href="http://littlecaptain.net/pages/nullablenonnull.html"><i class="fa fa-nullable&nonnull "></i> nullable&nonnull</a></li>
+							<li><a href="http://littlecaptain.net/pages/shellkong-zhi-yu-ju.html"><i class="fa fa-shell控制语句 "></i> shell控制语句</a></li>
+							<li><a href="http://littlecaptain.net/pages/shellshu-xue-yun-suan.html"><i class="fa fa-shell数学运算 "></i> shell数学运算</a></li>
+							<li><a href="http://littlecaptain.net/pages/shelljiao-ben-bian-cheng-ji-chu.html"><i class="fa fa-shell脚本编程基础 "></i> shell脚本编程基础</a></li>
+							<li><a href="http://littlecaptain.net/pages/yi-kuan-ji-yu-afnetworkingfeng-zhuang-de-wang-luo-kuang-jia.html"><i class="fa fa-一款基于AFNetworking封装的网络框架 "></i> 一款基于AFNetworking封装的网络框架</a></li>
+							<li><a href="http://littlecaptain.net/pages/fen-bu-shi-git-gong-zuo-liu-cheng.html"><i class="fa fa-分布式Git - 工作流程 "></i> 分布式Git - 工作流程</a></li>
+							<li><a href="http://littlecaptain.net/pages/fa-bu-kuang-jia-dao-cocoapodsshang.html"><i class="fa fa-发布框架到CocoaPods上 "></i> 发布框架到CocoaPods上</a></li>
+							<li><a href="http://littlecaptain.net/pages/ming-ling-ti-shi-fu-de-ge-shi.html"><i class="fa fa-命令提示符的格式 "></i> 命令提示符的格式</a></li>
+							<li><a href="http://littlecaptain.net/pages/zai-windowsping-tai-da-jian-gogsfu-wu.html"><i class="fa fa-在Windows平台搭建gogs服务 "></i> 在Windows平台搭建gogs服务</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-gcdzong-jie.html"><i class="fa fa-多线程-GCD总结 "></i> 多线程-GCD总结</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-nsoperationzong-jie.html"><i class="fa fa-多线程-NSOperation总结 "></i> 多线程-NSOperation总结</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-nsthreadde-shi-yong.html"><i class="fa fa-多线程-NSThread的使用 "></i> 多线程-NSThread的使用</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-ioszhong-de-zhu-xian-cheng.html"><i class="fa fa-多线程-iOS中的主线程 "></i> 多线程-iOS中的主线程</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-ioszhong-de-shi-xian-fang-an.html"><i class="fa fa-多线程-iOS中的实现方案 "></i> 多线程-iOS中的实现方案</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-ji-ben-gai-nian-he-yuan-li.html"><i class="fa fa-多线程-基本概念和原理 "></i> 多线程-基本概念和原理</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-an-quan-yin-huan.html"><i class="fa fa-多线程-安全隐患 "></i> 多线程-安全隐患</a></li>
+							<li><a href="http://littlecaptain.net/pages/duo-xian-cheng-xian-cheng-jian-tong-xin.html"><i class="fa fa-多线程-线程间通信 "></i> 多线程-线程间通信</a></li>
+							<li><a href="http://littlecaptain.net/pages/da-jian-gitfu-wu-qi.html"><i class="fa fa-搭建git服务器 "></i> 搭建git服务器</a></li>
+							<li><a href="http://littlecaptain.net/pages/ben-di-tui-song-tong-zhi.html"><i class="fa fa-本地推送通知 "></i> 本地推送通知</a></li>
+							<li><a href="http://littlecaptain.net/pages/zheng-ze-biao-da-shi-ji-chu.html"><i class="fa fa-正则表达式基础 "></i> 正则表达式基础</a></li>
+							<li><a href="http://littlecaptain.net/pages/huan-xin-ni-cheng-he-tou-xiang-de-chu-li.html"><i class="fa fa-环信昵称和头像的处理 "></i> 环信昵称和头像的处理</a></li>
+							<li><a href="http://littlecaptain.net/pages/wang-luo-ji-ben-gai-nian.html"><i class="fa fa-网络基本概念 "></i> 网络基本概念</a></li>
+							<li><a href="http://littlecaptain.net/pages/wang-luo-mo-xing.html"><i class="fa fa-网络模型 "></i> 网络模型</a></li>
+							<li><a href="http://littlecaptain.net/pages/liao-liao-ios-de-mvc-jia-gou.html"><i class="fa fa-聊聊 iOS 的 MVC 架构 "></i> 聊聊 iOS 的 MVC 架构</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Author</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="#">You can add links in your config file</a></li>
+							<li><a href="#">Another social link</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Categories</h4>
+						<ul class="list-unstyled my-list-style">
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Links</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="http://getpelican.com/">Pelican</a></li>
+							<li><a href="http://python.org/">Python.org</a></li>
+							<li><a href="http://jinja.pocoo.org/">Jinja2</a></li>
+							<li><a href="#">You can modify those links in your config file</a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</footer>
+<div class="container">
+	<div class="row">
+		<div class="col-md-12 text-center center-block aw-bottom">
+			<p>&copy; Little Captain 2016</p>
+			<p>Powered by Pelican</p>
+		</div>
+	</div>
+</div>
+<!-- JavaScript -->
+<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+	$("div.collapseheader").click(function () {
+		$header = $(this).children("span").first();
+		$codearea = $(this).children(".input_area");
+		$codearea.slideToggle(500, function () {
+			$header.text(function () {
+				return $codearea.is(":visible") ? "Collapse Code" : "Expand Code";
+			});
+		});
+	});
+});
+</script>
+</body>
+</html>
